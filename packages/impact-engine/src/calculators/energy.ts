@@ -8,6 +8,7 @@ export interface EnergyCalculationParams {
   reasoningIncludedInOutput?: boolean | 'unknown';
   modelFamily?: string | null;
   methodology: Methodology;
+  pue?: number;
 }
 
 export function calculateEnergy(params: EnergyCalculationParams): EnergyMetrics {
@@ -17,11 +18,12 @@ export function calculateEnergy(params: EnergyCalculationParams): EnergyMetrics 
     reasoningTokens = 0,
     reasoningIncludedInOutput = 'unknown',
     methodology,
+    pue: explicitPue,
   } = params;
   const variance = methodology.uncertaintyModel.energyVariancePct;
 
   let operationalWh = 0;
-  let pue = 1.12; // Default modern hyperscale PUE
+  let pue = explicitPue ?? 1.12; // Default modern hyperscale PUE unless overridden
 
   switch (methodology.id) {
     case 'google-operational-2025': {
@@ -31,7 +33,7 @@ export function calculateEnergy(params: EnergyCalculationParams): EnergyMetrics 
       const normalizedRatio = (inputTokens * 0.25 + outputTokens * 0.75) / (100 * 0.25 + 300 * 0.75);
       // Scaled operational Wh with floor to prevent 0 Wh on small queries
       operationalWh = Math.max(0.05, basePromptWh * Math.max(0.3, normalizedRatio));
-      pue = 1.10;
+      if (explicitPue === undefined) pue = 1.10;
       break;
     }
 
@@ -54,7 +56,7 @@ export function calculateEnergy(params: EnergyCalculationParams): EnergyMetrics 
       const reasoningWh = reasoningTokens * 0.00072;
       const baseSystemOverheadWh = 0.22; // Static hardware & host power allocation
       operationalWh = baseSystemOverheadWh + prefillWh + decodeWh + reasoningWh;
-      pue = 1.12;
+      if (explicitPue === undefined) pue = 1.12;
       break;
     }
 
@@ -62,7 +64,7 @@ export function calculateEnergy(params: EnergyCalculationParams): EnergyMetrics 
       // 45 mL and 1.14 g CO2e / 400 tokens implies ~0.38 Wh operational electrical equivalent
       const ratio = (inputTokens + outputTokens) / 400;
       operationalWh = Math.max(0.08, 0.38 * Math.max(0.25, ratio));
-      pue = 1.15;
+      if (explicitPue === undefined) pue = 1.15;
       break;
     }
 
@@ -72,7 +74,7 @@ export function calculateEnergy(params: EnergyCalculationParams): EnergyMetrics 
       const baseWh = 0.34;
       const tokenRatio = (inputTokens * 0.2 + outputTokens * 0.8) / 350;
       operationalWh = Math.max(0.06, baseWh * Math.max(0.3, tokenRatio));
-      pue = 1.12;
+      if (explicitPue === undefined) pue = 1.12;
       break;
     }
   }

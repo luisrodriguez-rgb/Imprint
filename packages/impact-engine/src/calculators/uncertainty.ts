@@ -1,9 +1,9 @@
-import { DataProvenance, EpistemicStatus, ImpactScope, MetricValue } from '@imprint/schemas';
+import { BoundType, DataProvenance, EpistemicStatus, ImpactScope, MetricValue } from '@imprint/schemas';
 
 /**
  * Creates a bounded MetricValue with [min, expected, max] based on a central value,
  * a methodology-defined variance percentage or explicit bounds override,
- * and an explicit epistemic status.
+ * an explicit epistemic status, and formal bound categorization (scenario vs variance).
  */
 export function createMetricValue(
   expected: number,
@@ -13,7 +13,9 @@ export function createMetricValue(
   scope: ImpactScope,
   decimals: number = 2,
   epistemicStatus: EpistemicStatus = 'modeled',
-  boundsOverride?: { min: number; max: number }
+  boundsOverride?: { min: number; max: number },
+  boundType?: BoundType,
+  boundSource?: string
 ): MetricValue {
   const round = (val: number) => {
     const p = Math.pow(10, decimals);
@@ -40,6 +42,9 @@ export function createMetricValue(
     provenance,
     scope,
     epistemicStatus,
+    boundType: boundType ?? (boundsOverride ? 'scenario' : 'methodology_variance'),
+    boundSource,
   };
 }
+
 

@@ -11,6 +11,9 @@ export * from './calculators/carbon';
 export * from './calculators/minerals';
 export * from './calculators/confidence';
 export * from './calculators/equivalences';
+export * from './calculators/sensitivity';
+export * from './calculators/trace';
+export * from './parameters/presets';
 
 export * from './engine';
 

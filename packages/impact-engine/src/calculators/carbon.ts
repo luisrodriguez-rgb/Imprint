@@ -63,6 +63,13 @@ export function calculateCarbon(params: CarbonCalculationParams): CarbonMetrics 
 
   const totalG = operationalG + (embodiedG ?? 0);
 
+  const boundType = isGeographyUnknown ? 'scenario' : 'methodology_variance';
+  const boundSource = isGeographyUnknown
+    ? 'Hyperscale grid scenario interval: low-carbon hydro/nuclear (160 g/kWh) to fossil peaker gas (580 g/kWh)'
+    : (geography?.region
+        ? `Provider reported region (${geography.region}) with ±${variance}% grid variance`
+        : `Methodology baseline grid intensity (${resolvedIntensity} g/kWh) with ±${variance}% variance`);
+
   return {
     operational: createMetricValue(
       operationalG,
@@ -72,7 +79,9 @@ export function calculateCarbon(params: CarbonCalculationParams): CarbonMetrics 
       'grid',
       3,
       'modeled',
-      boundsOverride
+      boundsOverride,
+      boundType,
+      boundSource
     ),
     lifecycleEmbodied: embodiedG !== undefined
       ? createMetricValue(
@@ -82,7 +91,10 @@ export function calculateCarbon(params: CarbonCalculationParams): CarbonMetrics 
           'methodology_model',
           'lifecycle',
           3,
-          'modeled'
+          'modeled',
+          undefined,
+          'methodology_variance',
+          'Supply-chain LCA embodied manufacturing variance'
         )
       : undefined,
     total: createMetricValue(
@@ -98,7 +110,9 @@ export function calculateCarbon(params: CarbonCalculationParams): CarbonMetrics 
             min: boundsOverride.min + (embodiedG ? embodiedG * (1 - variance / 100) : 0),
             max: boundsOverride.max + (embodiedG ? embodiedG * (1 + variance / 100) : 0),
           }
-        : undefined
+        : undefined,
+      boundType,
+      boundSource
     ),
   };
 }

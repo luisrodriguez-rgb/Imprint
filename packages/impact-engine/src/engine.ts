@@ -1,10 +1,13 @@
 import {
+  CalculationTrace,
   ConfidenceAssessment,
   DataProvenance,
   ImpactResult,
   InferenceGeography,
   Methodology,
   PhysicalEquivalence,
+  SensitivityContribution,
+  SystemParameters,
 } from '@imprint/schemas';
 import { calculateEnergy } from './calculators/energy';
 import { calculateWater } from './calculators/water';
@@ -12,6 +15,9 @@ import { calculateCarbon } from './calculators/carbon';
 import { calculateMineralDepletion } from './calculators/minerals';
 import { evaluateConfidence } from './calculators/confidence';
 import { generatePhysicalEquivalences } from './calculators/equivalences';
+import { analyzeSensitivity } from './calculators/sensitivity';
+import { buildCalculationTrace } from './calculators/trace';
+import { resolveParameters } from './parameters/presets';
 import { DEFAULT_METHODOLOGY_ID, getMethodology } from './methodologies/registry';
 
 export interface ImpactEngineInput {
@@ -23,6 +29,7 @@ export interface ImpactEngineInput {
   modelFamily?: string | null;
   providerId?: string;
   methodologyId?: string;
+  parameters?: Partial<SystemParameters>;
   gridCarbonIntensityGPerKwh?: number;
   geography?: InferenceGeography;
   inputProvenance?: DataProvenance;
@@ -35,10 +42,19 @@ export interface ImpactEngineOutput {
   confidence: ConfidenceAssessment;
   equivalences: PhysicalEquivalence[];
   methodology: Methodology;
+  parameters: SystemParameters;
+  trace: CalculationTrace;
+  sensitivity: SensitivityContribution[];
 }
 
 export function estimateImpact(input: ImpactEngineInput): ImpactEngineOutput {
   const methodology = getMethodology(input.methodologyId || DEFAULT_METHODOLOGY_ID);
+
+  const parameters = resolveParameters(methodology, {
+    ...input.parameters,
+    gridCarbonIntensityGPerKwh:
+      input.parameters?.gridCarbonIntensityGPerKwh ?? input.gridCarbonIntensityGPerKwh,
+  });
 
   const energy = calculateEnergy({
     inputTokens: input.inputTokens,
@@ -47,6 +63,7 @@ export function estimateImpact(input: ImpactEngineInput): ImpactEngineOutput {
     reasoningIncludedInOutput: input.reasoningIncludedInOutput,
     modelFamily: input.modelFamily,
     methodology,
+    pue: parameters.pue,
   });
 
   const water = calculateWater({
@@ -62,7 +79,7 @@ export function estimateImpact(input: ImpactEngineInput): ImpactEngineOutput {
     inputTokens: input.inputTokens,
     outputTokens: input.outputTokens,
     methodology,
-    gridCarbonIntensityGPerKwh: input.gridCarbonIntensityGPerKwh,
+    gridCarbonIntensityGPerKwh: parameters.gridCarbonIntensityGPerKwh,
     geography: input.geography,
   });
 
@@ -88,6 +105,34 @@ export function estimateImpact(input: ImpactEngineInput): ImpactEngineOutput {
     carbonG: carbon.total.expected,
   });
 
+  const sensitivity = analyzeSensitivity({
+    operationalWh: energy.operational.expected,
+    totalEnergyWh: energy.total.expected,
+    pue: parameters.pue,
+    gridCarbonIntensityGPerKwh: parameters.gridCarbonIntensityGPerKwh,
+    inputTokens: input.inputTokens,
+    outputTokens: input.outputTokens,
+    reasoningTokens: input.reasoningTokens,
+    methodology,
+    geographyKnown: Boolean(input.geography && input.geography.status === 'provider_reported'),
+  });
+
+  const trace = buildCalculationTrace({
+    methodology,
+    parameters,
+    inputTokens: input.inputTokens,
+    outputTokens: input.outputTokens,
+    reasoningTokens: input.reasoningTokens,
+    reasoningIncludedInOutput: input.reasoningIncludedInOutput,
+    operationalWh: energy.operational.expected,
+    totalEnergyWh: energy.total.expected,
+    onsiteWaterMl: water.consumption.onsite.expected,
+    upstreamWaterMl: water.consumption.upstream.expected,
+    operationalCarbonG: carbon.operational.expected,
+    epistemic: confidence.epistemic ?? { observed: [], estimated: [], assumed: [], unknown: [] },
+    sensitivity,
+  });
+
   return {
     impact: {
       methodologyId: methodology.id,
@@ -100,5 +145,8 @@ export function estimateImpact(input: ImpactEngineInput): ImpactEngineOutput {
     confidence,
     equivalences,
     methodology,
+    parameters,
+    trace,
+    sensitivity,
   };
 }
