@@ -3,6 +3,7 @@
 import React from 'react';
 import { Download, Upload, FileSpreadsheet, Layers, BarChart3, BookOpen } from 'lucide-react';
 import { ALL_METHODOLOGIES } from '@imprint/impact-engine';
+import { ImprintLogo } from './ImprintLogo';
 
 interface HeaderProps {
   activeTab: 'analytics' | 'methodologies';
@@ -29,9 +30,7 @@ export function Header({
     <header className="border-b border-[#29302C] bg-[#0B0D0C]/80 backdrop-blur-md sticky top-0 z-40 px-6 py-3.5 flex flex-col md:flex-row md:items-center justify-between gap-3">
       {/* Brand & Subtitle */}
       <div className="flex items-center gap-3">
-        <div className="flex items-center justify-center w-8 h-8 rounded border border-[#29302C] bg-[#111513] text-[#A8D5BA] font-mono font-bold text-sm shadow-sm">
-          I▏
-        </div>
+        <ImprintLogo size={32} fidelity="HIGH" />
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-sm font-bold tracking-widest text-[#F1F3F1] uppercase">

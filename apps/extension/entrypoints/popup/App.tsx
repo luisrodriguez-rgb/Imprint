@@ -27,6 +27,7 @@ import {
   ImprintSettings,
 } from '../../src/storage/ledger-storage';
 import { exportEventsToCsv } from '../../src/utils/csv-exporter';
+import { ImprintLogo } from '../../src/components/ImprintLogo';
 
 const ACTIVITIES: { id: ActivityCategory; label: string; code: string }[] = [
   { id: 'study', label: 'Study', code: 'STD' },
@@ -195,10 +196,7 @@ export default function App() {
       {/* 1. Scientific Instrument Header */}
       <header className="flex items-center justify-between pb-3 border-b border-[#29302C]">
         <div className="flex items-center gap-2.5">
-          {/* Logo Mark: Minimalist Cursor / Ledger Bar */}
-          <div className="flex items-center justify-center w-6 h-6 border border-[#29302C] bg-[#111513] rounded">
-            <span className="font-mono text-xs font-bold text-[#A8D5BA]">I▏</span>
-          </div>
+          <ImprintLogo size={26} fidelity={summary?.confidence || 'HIGH'} />
           <div>
             <div className="flex items-center gap-2">
               <span className="text-xs font-bold tracking-widest text-[#F1F3F1] uppercase">IMPRINT</span>
