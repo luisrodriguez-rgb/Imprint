@@ -5,16 +5,55 @@ export default {
   theme: {
     extend: {
       colors: {
-        background: '#090a0f',
-        card: '#12141c',
-        'card-border': '#1e2230',
-        energy: '#f59e0b', // Amber/Yellow
-        water: '#06b6d4',  // Cyan/Water blue
-        carbon: '#10b981', // Emerald
-        confidence: '#8b5cf6', // Violet
+        // Scientific Instrument / Editorial Data Product Palette
+        background: '#0B0D0C',
+        surface: {
+          DEFAULT: '#111513',
+          2: '#171B19',
+          3: '#1E2421',
+        },
+        border: {
+          DEFAULT: '#29302C',
+          subtle: '#1F2421',
+          strong: '#3A443F',
+        },
+        mineral: {
+          primary: '#A8D5BA', // Mineral Sage / Instrument Green
+          strong: '#6FB58A',
+          dark: '#284D39',
+          muted: '#3D5A47',
+        },
+        amber: {
+          accent: '#D8B878', // Warm Amber for Uncertainty / Attention
+          dark: '#4A3B1C',
+        },
+        content: {
+          primary: '#F1F3F1',
+          secondary: '#B0B8B2',
+          muted: '#8D9690',
+          faint: '#4E5752',
+        },
       },
       fontFamily: {
-        mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace'],
+        sans: [
+          'Inter',
+          '-apple-system',
+          'BlinkMacSystemFont',
+          'Segoe UI',
+          'Roboto',
+          'Helvetica',
+          'Arial',
+          'sans-serif',
+        ],
+        mono: [
+          'ui-monospace',
+          'SFMono-Regular',
+          'Menlo',
+          'Monaco',
+          'Consolas',
+          'Liberation Mono',
+          'monospace',
+        ],
       },
     },
   },

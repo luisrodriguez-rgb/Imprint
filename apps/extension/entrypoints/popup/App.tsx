@@ -1,20 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import {
-  Zap,
-  Droplets,
-  Cloud,
-  ShieldCheck,
-  Info,
-  Download,
-  Trash2,
-  ExternalLink,
   ChevronDown,
   ChevronUp,
-  Sparkles,
-  Smartphone,
-  Cpu,
+  Download,
+  FileSpreadsheet,
+  Trash2,
+  Plus,
+  Layers,
+  History,
+  CheckCircle2,
+  AlertCircle,
 } from 'lucide-react';
-import { LedgerEvent, LedgerSessionSummary } from '@imprint/schemas';
+import { LedgerEvent, LedgerSessionSummary, ActivityCategory } from '@imprint/schemas';
 import {
   listMethodologies,
   getMethodology,
@@ -29,14 +26,26 @@ import {
   aggregateSessionSummary,
   ImprintSettings,
 } from '../../src/storage/ledger-storage';
+import { exportEventsToCsv } from '../../src/utils/csv-exporter';
+
+const ACTIVITIES: { id: ActivityCategory; label: string; code: string }[] = [
+  { id: 'study', label: 'Study', code: 'STD' },
+  { id: 'coding', label: 'Code', code: 'DEV' },
+  { id: 'research', label: 'Research', code: 'R&D' },
+  { id: 'writing', label: 'Writing', code: 'TXT' },
+  { id: 'work', label: 'Work', code: 'WRK' },
+  { id: 'entertainment', label: 'Play', code: 'REC' },
+];
 
 export default function App() {
   const [events, setEvents] = useState<LedgerEvent[]>([]);
   const [summary, setSummary] = useState<LedgerSessionSummary | null>(null);
   const [settings, setSettings] = useState<ImprintSettings | null>(null);
-  const [showInspector, setShowInspector] = useState(false);
-  const [showConfidenceChecklist, setShowConfidenceChecklist] = useState(false);
-  const [activeTab, setActiveTab] = useState<'ledger' | 'inspector'>('ledger');
+  const [showConfidenceDetails, setShowConfidenceDetails] = useState(false);
+  const [showTurnHistory, setShowTurnHistory] = useState(false);
+  const [showMethodologyComparison, setShowMethodologyComparison] = useState(false);
+  const [activeView, setActiveView] = useState<'observatory' | 'methodology'>('observatory');
+  const [selectedTurnId, setSelectedTurnId] = useState<string | null>(null);
 
   const methodologies = listMethodologies();
 
@@ -50,6 +59,9 @@ export default function App() {
     setEvents(loadedEvents);
     setSettings(loadedSettings);
     setSummary(aggregateSessionSummary(loadedEvents));
+    if (loadedEvents.length > 0 && !selectedTurnId) {
+      setSelectedTurnId(loadedEvents[0].id);
+    }
   }
 
   async function handleMethodologyChange(methodologyId: string) {
@@ -58,8 +70,14 @@ export default function App() {
     setSettings(updated);
   }
 
+  async function handleActivitySelect(activity: ActivityCategory) {
+    if (!settings) return;
+    const updated = await updateSettings({ currentActivity: activity });
+    setSettings(updated);
+  }
+
   async function handleClearData() {
-    if (confirm('Clear all local AI footprint logs?')) {
+    if (confirm('Reset all local telemetry records? This action cannot be undone.')) {
       await clearLedger();
       await loadData();
     }
@@ -67,19 +85,28 @@ export default function App() {
 
   function handleExportJSON() {
     const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(events, null, 2));
-    const downloadAnchor = document.createElement('a');
-    downloadAnchor.setAttribute('href', dataStr);
-    downloadAnchor.setAttribute('download', `imprint-ledger-${new Date().toISOString().slice(0, 10)}.json`);
-    document.body.appendChild(downloadAnchor);
-    downloadAnchor.click();
-    downloadAnchor.remove();
+    downloadFile(dataStr, `imprint-ledger-${new Date().toISOString().slice(0, 10)}.json`);
   }
 
-  // Quick simulation tool to test live calculation & rendering immediately
+  function handleExportCSV() {
+    const csvContent = exportEventsToCsv(events);
+    const dataStr = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csvContent);
+    downloadFile(dataStr, `imprint-ledger-${new Date().toISOString().slice(0, 10)}.csv`);
+  }
+
+  function downloadFile(dataUri: string, filename: string) {
+    const a = document.createElement('a');
+    a.href = dataUri;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
+
   async function handleAddSimulatedTurn() {
     const calculation = estimateImpact({
-      inputTokens: 140,
-      outputTokens: 380,
+      inputTokens: 160,
+      outputTokens: 420,
       reasoningTokens: 0,
       modelFamily: 'gpt-4o',
       providerId: 'chatgpt',
@@ -90,31 +117,31 @@ export default function App() {
     });
 
     const newEvent: LedgerEvent = {
-      id: `evt-sim-${Date.now()}`,
+      id: `evt-${Date.now()}`,
       timestamp: Date.now(),
       provider: 'chatgpt',
       modelRaw: 'GPT-4o',
       modelFamily: 'gpt-4o',
-      sessionId: 'demo-session',
+      sessionId: 'session-live',
       interactionIndex: events.length + 1,
       input: {
-        charCount: 520,
-        wordCount: 88,
-        estimatedTokens: 140,
+        charCount: 580,
+        wordCount: 92,
+        estimatedTokens: 160,
         modality: 'text',
         provenance: 'local_estimation',
       },
       output: {
-        charCount: 1450,
-        wordCount: 240,
-        estimatedTokens: 380,
+        charCount: 1610,
+        wordCount: 265,
+        estimatedTokens: 420,
         reasoningTokens: 0,
         modality: 'text',
         provenance: 'browser_observation',
       },
       activity: {
-        category: 'study',
-        source: 'heuristic',
+        category: settings?.currentActivity || 'study',
+        source: 'manual',
       },
       impact: calculation.impact,
       confidence: calculation.confidence,
@@ -122,199 +149,287 @@ export default function App() {
 
     await appendLedgerEvent(newEvent);
     await loadData();
+    setSelectedTurnId(newEvent.id);
   }
 
   const activeMethodology = getMethodology(settings?.activeMethodologyId || 'joule-frontier-2026');
   const latestEvent = events[0] || null;
 
+  // Comparison matrix calculations
+  const totalInTokens = summary ? summary.totalInputTokens : 0;
+  const totalOutTokens = summary ? summary.totalOutputTokens : 0;
+  const comparisonResults = methodologies.map((m) => {
+    const res = estimateImpact({
+      inputTokens: Math.max(1, totalInTokens),
+      outputTokens: Math.max(1, totalOutTokens),
+      methodologyId: m.id,
+      modelFamily: 'gpt-4o',
+      providerId: 'chatgpt',
+    });
+    return {
+      methodology: m,
+      energyWh: res.impact.energy.total.expected,
+      waterMl: res.impact.water.consumption.total.expected,
+      carbonG: res.impact.carbon.total.expected,
+      mineralsMg: res.impact.minerals?.depletion.expected,
+    };
+  });
+
   return (
-    <div className="flex flex-col min-h-[540px] bg-[#090a0f] text-slate-100 p-4 select-none">
-      {/* Top Header */}
-      <div className="flex items-center justify-between pb-3 border-b border-[#1e2230]">
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-amber-500 to-cyan-500 flex items-center justify-center font-black text-xs text-black shadow-md shadow-amber-500/20">
-            IM
+    <div className="flex flex-col min-h-[580px] bg-[#0B0D0C] text-[#F1F3F1] p-4 select-none font-sans">
+      {/* 1. Scientific Instrument Header */}
+      <header className="flex items-center justify-between pb-3 border-b border-[#29302C]">
+        <div className="flex items-center gap-2.5">
+          {/* Logo Mark: Minimalist Cursor / Ledger Bar */}
+          <div className="flex items-center justify-center w-6 h-6 border border-[#29302C] bg-[#111513] rounded">
+            <span className="font-mono text-xs font-bold text-[#A8D5BA]">I▏</span>
           </div>
           <div>
-            <h1 className="text-sm font-bold tracking-tight text-white flex items-center gap-1.5">
-              Imprint
-              <span className="text-[10px] font-mono font-medium px-1.5 py-0.2 rounded bg-[#161a26] text-amber-400 border border-amber-500/30">
-                v0.1
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold tracking-widest text-[#F1F3F1] uppercase">IMPRINT</span>
+              <span className="text-[9px] font-mono text-[#8D9690] px-1 py-0.2 border border-[#29302C] rounded bg-[#111513]">
+                INSTRUMENT 0.1
               </span>
-            </h1>
-            <p className="text-[10px] text-slate-400">Personal AI Resource Ledger</p>
+            </div>
+            <div className="text-[10px] text-[#8D9690] tracking-tight">Computational Resource Ledger</div>
           </div>
         </div>
 
-        <div className="flex items-center gap-1">
-          <div className="flex items-center gap-1 bg-[#121520] px-2 py-0.5 rounded-full border border-emerald-500/20 text-[10px] text-emerald-400 font-medium">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            Local-Only
-          </div>
+        <div className="flex items-center gap-1.5 text-[10px] font-mono text-[#8D9690] bg-[#111513] border border-[#29302C] px-2 py-0.5 rounded">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#A8D5BA]" />
+          <span>LOCAL ONLY</span>
         </div>
-      </div>
+      </header>
 
-      {/* Navigation tabs */}
-      <div className="flex items-center gap-1 mt-3 bg-[#12141c] p-0.5 rounded-lg border border-[#1e2230]">
+      {/* 2. Navigation Tabs (Scientific Observatory vs Methodology Spec) */}
+      <nav className="grid grid-cols-2 gap-1 mt-3 bg-[#111513] p-1 border border-[#29302C] rounded-lg">
         <button
-          onClick={() => setActiveTab('ledger')}
-          className={`flex-1 py-1 text-xs font-medium rounded-md transition-colors ${
-            activeTab === 'ledger' ? 'bg-[#1e2230] text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'
+          onClick={() => setActiveView('observatory')}
+          className={`py-1 text-xs font-medium tracking-wide transition-colors rounded ${
+            activeView === 'observatory'
+              ? 'bg-[#171B19] text-[#F1F3F1] border border-[#29302C]'
+              : 'text-[#8D9690] hover:text-[#F1F3F1]'
           }`}
         >
-          Session Ledger
+          Observation Desk
         </button>
         <button
-          onClick={() => setActiveTab('inspector')}
-          className={`flex-1 py-1 text-xs font-medium rounded-md transition-colors ${
-            activeTab === 'inspector' ? 'bg-[#1e2230] text-cyan-400 shadow-sm' : 'text-slate-400 hover:text-slate-200'
+          onClick={() => setActiveView('methodology')}
+          className={`py-1 text-xs font-medium tracking-wide transition-colors rounded ${
+            activeView === 'methodology'
+              ? 'bg-[#171B19] text-[#A8D5BA] border border-[#29302C]'
+              : 'text-[#8D9690] hover:text-[#F1F3F1]'
           }`}
         >
-          Methodology Inspector
+          Methodology Spec
         </button>
-      </div>
+      </nav>
 
-      {activeTab === 'ledger' ? (
-        <div className="flex flex-col gap-3 mt-3">
-          {/* Active Session Overview */}
-          <div className="bg-[#12141c] border border-[#1e2230] rounded-xl p-3 flex flex-col gap-2 relative overflow-hidden">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1.5 text-xs text-slate-300 font-medium">
-                <Cpu className="w-3.5 h-3.5 text-slate-400" />
-                <span>ChatGPT Session</span>
-                <span className="text-[10px] text-slate-500">
-                  ({summary ? `${summary.interactionCount} turns` : '0 turns'})
+      {activeView === 'observatory' ? (
+        <main className="flex flex-col gap-3 mt-3">
+          {/* A. Hero Measurement Box */}
+          <section className="bg-[#111513] border border-[#29302C] rounded-xl p-3.5 flex flex-col gap-3">
+            <div className="flex items-center justify-between text-[11px] text-[#8D9690]">
+              <span className="font-mono tracking-wider text-[10px] uppercase">TELEMETRY · CHATGPT SESSION</span>
+              <span className="font-mono text-[#A8D5BA]">
+                {summary ? `${summary.interactionCount} TURNS` : '0 TURNS'}
+              </span>
+            </div>
+
+            {/* Main Primary Reading: Energy */}
+            <div className="flex flex-col pb-2.5 border-b border-[#29302C]">
+              <div className="flex items-baseline justify-between">
+                <span className="font-mono text-3xl font-bold tracking-tight text-[#F1F3F1]">
+                  {summary ? summary.totalEnergyWh.expected : '0.00'}
+                </span>
+                <span className="text-xs font-mono font-medium text-[#A8D5BA] uppercase tracking-wider">
+                  Wh · ENERGY
                 </span>
               </div>
+              <div className="flex items-center justify-between text-[10px] font-mono text-[#8D9690] mt-0.5">
+                <span>Operational + Datacenter PUE</span>
+                <span className="text-[#A8D5BA]/80">
+                  [{summary ? `${summary.totalEnergyWh.min} – ${summary.totalEnergyWh.max}` : '0.00 – 0.00'}]
+                </span>
+              </div>
+            </div>
 
-              {/* Confidence Badge */}
-              {latestEvent && (
+            {/* Secondary Readings: Water & Carbon */}
+            <div className="grid grid-cols-2 gap-3">
+              {/* Water */}
+              <div className="flex flex-col">
+                <div className="flex items-baseline justify-between">
+                  <span className="font-mono text-xl font-semibold text-[#F1F3F1]">
+                    {summary ? summary.totalWaterConsumptionMl.expected : '0.00'}
+                  </span>
+                  <span className="text-[10px] font-mono text-[#8D9690] uppercase">mL WATER</span>
+                </div>
+                <div className="text-[9px] font-mono text-[#8D9690] mt-0.5">
+                  Evaporated [{summary ? `${summary.totalWaterConsumptionMl.min}–${summary.totalWaterConsumptionMl.max}` : '0–0'}]
+                </div>
+              </div>
+
+              {/* Carbon */}
+              <div className="flex flex-col">
+                <div className="flex items-baseline justify-between">
+                  <span className="font-mono text-xl font-semibold text-[#F1F3F1]">
+                    {summary ? summary.totalCarbonG.expected : '0.00'}
+                  </span>
+                  <span className="text-[10px] font-mono text-[#8D9690] uppercase">g CO₂e</span>
+                </div>
+                <div className="text-[9px] font-mono text-[#8D9690] mt-0.5">
+                  Grid emissions [{summary ? `${summary.totalCarbonG.min}–${summary.totalCarbonG.max}` : '0–0'}]
+                </div>
+              </div>
+            </div>
+
+            {/* Confidence Strip (Amber Accent) */}
+            {latestEvent && (
+              <div className="pt-2 border-t border-[#29302C]">
                 <button
-                  onClick={() => setShowConfidenceChecklist(!showConfidenceChecklist)}
-                  className="flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded bg-[#1a1828] text-violet-300 border border-violet-500/30 hover:bg-[#221f38] transition-colors"
+                  onClick={() => setShowConfidenceDetails(!showConfidenceDetails)}
+                  className="w-full flex items-center justify-between text-[10px] font-mono text-[#D8B878] hover:text-[#E8CE94] transition-colors"
                 >
-                  <ShieldCheck className="w-3 h-3 text-violet-400" />
-                  <span>{latestEvent.confidence.level} CONFIDENCE</span>
-                  {showConfidenceChecklist ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#D8B878]" />
+                    <span>{latestEvent.confidence.level} OBSERVATIONAL FIDELITY</span>
+                    <span className="text-[#8D9690]">({latestEvent.confidence.score}/100)</span>
+                  </div>
+                  {showConfidenceDetails ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
                 </button>
+
+                {showConfidenceDetails && (
+                  <div className="mt-2 p-2 bg-[#0B0D0C] border border-[#29302C] rounded text-[10px] font-mono flex flex-col gap-1.5">
+                    <div className="text-[#8D9690]">{latestEvent.confidence.summary}</div>
+                    <div className="flex flex-col gap-1 mt-1">
+                      {latestEvent.confidence.checklist.map((c) => (
+                        <div key={c.id} className="flex items-start gap-1.5">
+                          {c.passed ? (
+                            <span className="text-[#A8D5BA]">✓</span>
+                          ) : (
+                            <span className="text-[#D8B878]">△</span>
+                          )}
+                          <div className="flex flex-col">
+                            <span className="text-[#F1F3F1]">{c.title}</span>
+                            <span className="text-[9px] text-[#8D9690]">{c.description}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </section>
+
+          {/* B. The Imprint Line (Compute Timeline) */}
+          <section className="bg-[#111513] border border-[#29302C] rounded-xl p-3 flex flex-col gap-2">
+            <div className="flex items-center justify-between text-[10px] font-mono text-[#8D9690]">
+              <span>COMPUTE CHRONOLOGY</span>
+              <span>{events.length} RECORDED TURNS</span>
+            </div>
+
+            {/* Visual Imprint Waveform / Stepped Chart */}
+            <div className="h-10 w-full flex items-end gap-1 px-1 py-1 bg-[#0B0D0C] border border-[#29302C] rounded">
+              {events.length === 0 ? (
+                <div className="w-full text-center text-[10px] font-mono text-[#4E5752] py-1">
+                  Awaiting assistant inference...
+                </div>
+              ) : (
+                events.slice(0, 24).reverse().map((ev, idx) => {
+                  const maxEnergy = Math.max(...events.map((e) => e.impact.energy.total.expected), 1.0);
+                  const heightPct = Math.min(100, Math.max(15, (ev.impact.energy.total.expected / maxEnergy) * 100));
+                  const isSelected = selectedTurnId === ev.id;
+                  return (
+                    <button
+                      key={ev.id}
+                      onClick={() => setSelectedTurnId(ev.id)}
+                      title={`Turn #${ev.interactionIndex}: ${ev.impact.energy.total.expected} Wh`}
+                      style={{ height: `${heightPct}%` }}
+                      className={`flex-1 min-w-[6px] rounded-t transition-all ${
+                        isSelected
+                          ? 'bg-[#A8D5BA]'
+                          : 'bg-[#284D39] hover:bg-[#6FB58A]'
+                      }`}
+                    />
+                  );
+                })
               )}
             </div>
 
-            {/* Expandable Confidence Checklist */}
-            {showConfidenceChecklist && latestEvent && (
-              <div className="mt-1 p-2 bg-[#090a0f] rounded-lg border border-violet-500/20 text-[11px] flex flex-col gap-1.5">
-                <div className="text-[10px] text-slate-400">{latestEvent.confidence.summary}</div>
-                <div className="flex flex-col gap-1">
-                  {latestEvent.confidence.checklist.map((c) => (
-                    <div key={c.id} className="flex items-start gap-1.5">
-                      <span className={c.passed ? 'text-emerald-400' : 'text-amber-400'}>
-                        {c.passed ? '✓' : '△'}
-                      </span>
-                      <div className="flex flex-col">
-                        <span className="font-medium text-slate-200">{c.title}</span>
-                        <span className="text-[9px] text-slate-500">{c.description}</span>
-                      </div>
-                    </div>
-                  ))}
+            {/* Selected Turn Detail */}
+            {selectedTurnId && events.find((e) => e.id === selectedTurnId) && (() => {
+              const ev = events.find((e) => e.id === selectedTurnId)!;
+              return (
+                <div className="flex items-center justify-between text-[10px] font-mono pt-1 text-[#8D9690]">
+                  <span>
+                    Turn #{ev.interactionIndex} · <strong className="text-[#F1F3F1]">{ev.modelRaw || 'GPT-4o'}</strong>
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[#A8D5BA]">{ev.impact.energy.total.expected} Wh</span>
+                    <span>{ev.impact.water.consumption.total.expected} mL</span>
+                    <span className="uppercase text-[#8D9690]">{ev.activity.category}</span>
+                  </div>
                 </div>
-              </div>
-            )}
+              );
+            })()}
+          </section>
 
-            {/* Core Resource Metrics Grid */}
-            <div className="grid grid-cols-3 gap-2 mt-1">
-              {/* Energy Card */}
-              <div className="bg-[#161a26] border border-amber-500/20 rounded-lg p-2 flex flex-col">
-                <div className="flex items-center justify-between text-amber-400">
-                  <span className="text-[10px] font-medium tracking-wide">ENERGY</span>
-                  <Zap className="w-3.5 h-3.5" />
-                </div>
-                <div className="text-base font-bold text-white mt-1">
-                  {summary ? summary.totalEnergyWh.expected : '0.00'}{' '}
-                  <span className="text-[10px] font-normal text-slate-400">Wh</span>
-                </div>
-                <div className="text-[9px] font-mono text-amber-300/70 mt-0.5">
-                  [{summary ? `${summary.totalEnergyWh.min}–${summary.totalEnergyWh.max}` : '0–0'}]
-                </div>
-              </div>
-
-              {/* Water Consumed Card */}
-              <div className="bg-[#161a26] border border-cyan-500/20 rounded-lg p-2 flex flex-col">
-                <div className="flex items-center justify-between text-cyan-400">
-                  <span className="text-[10px] font-medium tracking-wide">WATER</span>
-                  <Droplets className="w-3.5 h-3.5" />
-                </div>
-                <div className="text-base font-bold text-white mt-1">
-                  {summary ? summary.totalWaterConsumptionMl.expected : '0.00'}{' '}
-                  <span className="text-[10px] font-normal text-slate-400">mL</span>
-                </div>
-                <div className="text-[9px] font-mono text-cyan-300/70 mt-0.5">
-                  [{summary ? `${summary.totalWaterConsumptionMl.min}–${summary.totalWaterConsumptionMl.max}` : '0–0'}]
-                </div>
-              </div>
-
-              {/* Carbon Card */}
-              <div className="bg-[#161a26] border border-emerald-500/20 rounded-lg p-2 flex flex-col">
-                <div className="flex items-center justify-between text-emerald-400">
-                  <span className="text-[10px] font-medium tracking-wide">CARBON</span>
-                  <Cloud className="w-3.5 h-3.5" />
-                </div>
-                <div className="text-base font-bold text-white mt-1">
-                  {summary ? summary.totalCarbonG.expected : '0.00'}{' '}
-                  <span className="text-[10px] font-normal text-slate-400">g</span>
-                </div>
-                <div className="text-[9px] font-mono text-emerald-300/70 mt-0.5">
-                  [{summary ? `${summary.totalCarbonG.min}–${summary.totalCarbonG.max}` : '0–0'}]
-                </div>
-              </div>
+          {/* C. Activity Intent Selector (Scientific Codes) */}
+          <section className="bg-[#111513] border border-[#29302C] rounded-xl p-2.5 flex flex-col gap-1.5">
+            <div className="flex items-center justify-between text-[10px] font-mono text-[#8D9690]">
+              <span>ACTIVE INTENT CATEGORY</span>
+              <span className="text-[9px] uppercase text-[#4E5752]">Attributed to new events</span>
             </div>
+            <div className="grid grid-cols-6 gap-1">
+              {ACTIVITIES.map((act) => {
+                const isSelected = settings?.currentActivity === act.id;
+                return (
+                  <button
+                    key={act.id}
+                    onClick={() => handleActivitySelect(act.id)}
+                    className={`py-1 px-1 rounded text-center font-mono text-[10px] transition-all border ${
+                      isSelected
+                        ? 'bg-[#1E2421] border-[#A8D5BA] text-[#A8D5BA] font-bold'
+                        : 'bg-[#0B0D0C] border-[#29302C] text-[#8D9690] hover:text-[#F1F3F1] hover:border-[#3A443F]'
+                    }`}
+                  >
+                    {act.code}
+                  </button>
+                );
+              })}
+            </div>
+          </section>
 
-            {/* Honest Equivalence contextual note */}
-            {summary && summary.totalEnergyWh.expected > 0 && (
-              <div className="mt-1 flex items-center gap-1.5 p-1.5 bg-[#090a0f] rounded-lg border border-[#1e2230] text-[10px] text-slate-300">
-                <Smartphone className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                <span>
-                  ≈{' '}
-                  <strong className="text-white">
-                    {Math.max(1, Math.round((summary.totalEnergyWh.expected / 15) * 100))}–
-                    {Math.max(1, Math.round((summary.totalEnergyWh.expected / 12) * 100))}%
-                  </strong>{' '}
-                  of a smartphone battery (12–15 Wh)
-                </span>
-              </div>
-            )}
-          </div>
-
-          {/* Privacy Guarantee callout */}
-          <div className="flex items-start gap-2 p-2.5 rounded-lg bg-[#0d121c] border border-cyan-500/20 text-[11px] text-slate-300">
-            <ShieldCheck className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
-            <div>
-              <strong className="text-white">Zero Prompt Storage</strong>
-              <p className="text-[10px] text-slate-400 mt-0.5 leading-snug">
-                Your prompt words never leave this browser. Only turn counts and character lengths are measured locally.
-              </p>
+          {/* D. Data Integrity Notice */}
+          <div className="p-2.5 rounded-lg bg-[#111513] border border-[#29302C] text-[10px] text-[#8D9690] flex items-start gap-2">
+            <span className="text-[#A8D5BA] font-mono mt-0.5">🔒</span>
+            <div className="leading-relaxed">
+              <strong className="text-[#F1F3F1]">Private by Design:</strong> No prompt or assistant text is stored or transmitted. All calculations run strictly in your browser.
             </div>
           </div>
 
-          {/* Demo quick simulation button (helpful for immediate manual testing) */}
+          {/* Simulated Step Button for Fast Testing */}
           <button
             onClick={handleAddSimulatedTurn}
-            className="flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg bg-[#161a26] hover:bg-[#1f2436] border border-[#1e2230] text-xs text-amber-300 font-medium transition-colors"
+            className="flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg border border-[#29302C] bg-[#111513] hover:bg-[#171B19] text-xs font-mono text-[#A8D5BA] transition-colors"
           >
-            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-            <span>Simulate Interaction (+1 Turn)</span>
+            <Plus className="w-3 h-3" />
+            <span>RECORD TEST TURN (+1)</span>
           </button>
-        </div>
+        </main>
       ) : (
-        /* Methodology Inspector View */
-        <div className="flex flex-col gap-3 mt-3 overflow-y-auto max-h-[380px] pr-1">
+        /* 3. Methodology Spec View (Paper-grade Documentation) */
+        <main className="flex flex-col gap-3 mt-3 overflow-y-auto max-h-[420px] pr-1">
+          {/* Methodology Selector */}
           <div className="flex flex-col gap-1">
-            <label className="text-[10px] font-medium text-slate-400 uppercase tracking-wider">
-              Active Methodology
+            <label className="text-[10px] font-mono text-[#8D9690] uppercase tracking-wider">
+              Selected Scientific Benchmark
             </label>
             <select
               value={settings?.activeMethodologyId}
               onChange={(e) => handleMethodologyChange(e.target.value)}
-              className="bg-[#12141c] border border-[#1e2230] rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-cyan-500"
+              className="bg-[#111513] border border-[#29302C] rounded-lg px-2.5 py-1.5 text-xs text-[#F1F3F1] font-mono focus:outline-none focus:border-[#A8D5BA]"
             >
               {methodologies.map((m) => (
                 <option key={m.id} value={m.id}>
@@ -324,98 +439,151 @@ export default function App() {
             </select>
           </div>
 
-          {/* Methodology Details Card */}
-          <div className="bg-[#12141c] border border-[#1e2230] rounded-xl p-3 flex flex-col gap-2.5 text-xs">
-            <div>
-              <div className="font-semibold text-white">{activeMethodology.name}</div>
-              <div className="text-[10px] text-slate-400 mt-0.5">{activeMethodology.description}</div>
-            </div>
+          {/* Datasheet Document */}
+          <article className="bg-[#111513] border border-[#29302C] rounded-xl p-3.5 flex flex-col gap-3 text-xs">
+            <header className="pb-2 border-b border-[#29302C]">
+              <div className="font-mono text-sm font-bold text-[#F1F3F1]">{activeMethodology.name}</div>
+              <p className="text-[11px] text-[#8D9690] mt-1 leading-relaxed">{activeMethodology.description}</p>
+              <div className="flex items-center gap-2 mt-2 font-mono text-[9px]">
+                <span className="px-1.5 py-0.5 rounded bg-[#171B19] border border-[#29302C] text-[#A8D5BA]">
+                  BOUNDARY: {activeMethodology.boundary.toUpperCase()}
+                </span>
+                <span className="px-1.5 py-0.5 rounded bg-[#171B19] border border-[#29302C] text-[#D8B878]">
+                  SCOPE: {activeMethodology.primaryScope.toUpperCase()}
+                </span>
+              </div>
+            </header>
 
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] px-2 py-0.5 rounded bg-[#161a26] text-cyan-400 border border-cyan-500/20">
-                Boundary: {activeMethodology.boundary}
-              </span>
-              <span className="text-[10px] px-2 py-0.5 rounded bg-[#161a26] text-amber-400 border border-amber-500/20">
-                Scope: {activeMethodology.primaryScope}
-              </span>
-            </div>
-
-            {/* Calculation Walkthrough steps */}
-            <div className="flex flex-col gap-1.5 pt-2 border-t border-[#1e2230]">
-              <div className="text-[10px] font-semibold text-slate-300 uppercase tracking-wider">
-                Calculation Walkthrough
+            {/* Formal Formula Sections */}
+            <div className="flex flex-col gap-2.5 font-mono text-[10px]">
+              {/* Section 01 */}
+              <div>
+                <div className="text-[#8D9690] uppercase tracking-wider">01 INPUT OBSERVATION</div>
+                <div className="text-[#F1F3F1] mt-0.5">
+                  T_in, T_out derived from DOM character length (ratio ~3.8 chars/token).
+                </div>
               </div>
 
-              <div className="flex flex-col gap-1 text-[11px] text-slate-400">
-                <div className="flex items-start gap-1.5">
-                  <span className="font-mono text-cyan-400">01</span>
-                  <span>
-                    <strong>Observation:</strong> Assistant turn completions & DOM character lengths.
-                  </span>
+              {/* Section 02 */}
+              <div className="pt-2 border-t border-[#29302C]">
+                <div className="text-[#8D9690] uppercase tracking-wider">02 ENERGY MODEL</div>
+                <div className="text-[#A8D5BA] font-semibold mt-0.5">
+                  E_inference = E_base + (T_in · e_in) + (T_out · e_out) + (T_reason · e_reason)
                 </div>
-                <div className="flex items-start gap-1.5">
-                  <span className="font-mono text-cyan-400">02</span>
-                  <span>
-                    <strong>Tokens:</strong> Heuristically estimated at ~3.8 chars/token client-side.
-                  </span>
-                </div>
-                <div className="flex items-start gap-1.5">
-                  <span className="font-mono text-cyan-400">03</span>
-                  <span>
-                    <strong>Energy:</strong> Prefill, decode, and reasoning power curves applied.
-                  </span>
-                </div>
-                <div className="flex items-start gap-1.5">
-                  <span className="font-mono text-cyan-400">04</span>
-                  <span>
-                    <strong>Water:</strong> Onsite evaporative cooling + upstream thermoelectric loss.
-                  </span>
-                </div>
-                <div className="flex items-start gap-1.5">
-                  <span className="font-mono text-cyan-400">05</span>
-                  <span>
-                    <strong>Uncertainty:</strong> ±{activeMethodology.uncertaintyModel.energyVariancePct}% energy, ±{activeMethodology.uncertaintyModel.waterVariancePct}% water range.
-                  </span>
-                </div>
+                <div className="text-[#8D9690] mt-0.5">Total E = E_inference · PUE (Datacenter fleet overhead)</div>
               </div>
-            </div>
 
-            {/* Sources list */}
-            <div className="flex flex-col gap-1 pt-2 border-t border-[#1e2230]">
-              <div className="text-[10px] font-semibold text-slate-300 uppercase tracking-wider">
-                Sources & Citations
-              </div>
-              {activeMethodology.sources.map((s) => (
-                <div key={s.id} className="text-[10px] text-slate-400">
-                  <span className="text-slate-200 font-medium">{s.title}</span> ({s.year})
-                  {s.publisher && <span className="text-slate-500"> — {s.publisher}</span>}
+              {/* Section 03 */}
+              <div className="pt-2 border-t border-[#29302C]">
+                <div className="text-[#8D9690] uppercase tracking-wider">03 WATER REFRIGERATION & GRID</div>
+                <div className="text-[#A8D5BA] font-semibold mt-0.5">
+                  W_total = W_onsite (evaporative cooling) + W_upstream (grid electricity)
                 </div>
-              ))}
+                <div className="text-[#8D9690] mt-0.5">W_onsite = E_datacenter · WUE_site (L/kWh)</div>
+              </div>
+
+              {/* Section 04 */}
+              <div className="pt-2 border-t border-[#29302C]">
+                <div className="text-[#8D9690] uppercase tracking-wider">04 UNCERTAINTY ERROR MARGINS</div>
+                <div className="text-[#D8B878] mt-0.5">
+                  Energy: ±{activeMethodology.uncertaintyModel.energyVariancePct}% · Water: ±{activeMethodology.uncertaintyModel.waterVariancePct}%
+                </div>
+              </div>
+
+              {/* Section 05: Sources */}
+              <div className="pt-2 border-t border-[#29302C]">
+                <div className="text-[#8D9690] uppercase tracking-wider">05 CITED SCIENTIFIC LITERATURE</div>
+                <div className="flex flex-col gap-1 mt-1 text-[9px] text-[#8D9690]">
+                  {activeMethodology.sources.map((s) => (
+                    <div key={s.id} className="p-1.5 rounded bg-[#0B0D0C] border border-[#29302C]">
+                      <span className="text-[#F1F3F1] font-semibold">[{s.id.toUpperCase()}]</span> {s.title} ({s.year})
+                      {s.publisher && <span className="text-[#4E5752]"> — {s.publisher}</span>}
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
+          </article>
+
+          {/* Side-by-Side Comparative Matrix */}
+          <section className="bg-[#111513] border border-[#29302C] rounded-xl p-3 flex flex-col gap-2 font-mono">
+            <button
+              onClick={() => setShowMethodologyComparison(!showMethodologyComparison)}
+              className="flex items-center justify-between text-xs font-semibold text-[#A8D5BA] hover:text-[#6FB58A]"
+            >
+              <div className="flex items-center gap-1.5">
+                <Layers className="w-3.5 h-3.5" />
+                <span>SIDE-BY-SIDE METHODOLOGY MATRIX</span>
+              </div>
+              {showMethodologyComparison ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+            </button>
+
+            {showMethodologyComparison && (
+              <div className="flex flex-col gap-1.5 mt-2 pt-2 border-t border-[#29302C]">
+                <p className="text-[9px] text-[#8D9690]">
+                  Evaluates identical session tokens across distinct system boundaries:
+                </p>
+                {comparisonResults.map((item) => (
+                  <div
+                    key={item.methodology.id}
+                    className={`p-2 rounded border text-[10px] flex flex-col gap-0.5 ${
+                      item.methodology.id === settings?.activeMethodologyId
+                        ? 'bg-[#171B19] border-[#A8D5BA] text-[#F1F3F1]'
+                        : 'bg-[#0B0D0C] border-[#29302C] text-[#8D9690]'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between font-bold">
+                      <span className="text-[#F1F3F1]">{item.methodology.name}</span>
+                      <span className="text-[9px] px-1 rounded bg-[#111513] border border-[#29302C] text-[#A8D5BA]">
+                        {item.methodology.boundary.toUpperCase()}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-3 gap-1 text-[9px] pt-1 text-[#8D9690]">
+                      <div>⚡ {item.energyWh} Wh</div>
+                      <div>💧 {item.waterMl} mL</div>
+                      <div>☁️ {item.carbonG} g</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+        </main>
       )}
 
-      {/* Footer Controls */}
-      <div className="mt-auto pt-3 border-t border-[#1e2230] flex items-center justify-between text-xs text-slate-400">
-        <button
-          onClick={handleExportJSON}
-          disabled={events.length === 0}
-          className="flex items-center gap-1 hover:text-slate-200 transition-colors disabled:opacity-40"
-        >
-          <Download className="w-3.5 h-3.5" />
-          <span>Export JSON</span>
-        </button>
+      {/* 4. Scientific Instrument Footer Controls */}
+      <footer className="mt-auto pt-3 border-t border-[#29302C] flex items-center justify-between text-xs font-mono text-[#8D9690]">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={handleExportCSV}
+            disabled={events.length === 0}
+            className="flex items-center gap-1 hover:text-[#A8D5BA] transition-colors disabled:opacity-30"
+            title="Download CSV spreadsheet"
+          >
+            <FileSpreadsheet className="w-3 h-3" />
+            <span>.CSV</span>
+          </button>
+          <button
+            onClick={handleExportJSON}
+            disabled={events.length === 0}
+            className="flex items-center gap-1 hover:text-[#A8D5BA] transition-colors disabled:opacity-30"
+            title="Download JSON ledger"
+          >
+            <Download className="w-3 h-3" />
+            <span>.JSON</span>
+          </button>
+        </div>
 
         <button
           onClick={handleClearData}
           disabled={events.length === 0}
-          className="flex items-center gap-1 hover:text-red-400 transition-colors disabled:opacity-40"
+          className="flex items-center gap-1 hover:text-red-400 transition-colors disabled:opacity-30"
+          title="Reset telemetry"
         >
-          <Trash2 className="w-3.5 h-3.5" />
-          <span>Clear Data</span>
+          <Trash2 className="w-3 h-3" />
+          <span>RESET</span>
         </button>
-      </div>
+      </footer>
     </div>
   );
 }
