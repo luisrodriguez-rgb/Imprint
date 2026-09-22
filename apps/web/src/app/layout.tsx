@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import { ThemeProvider } from '../context/ThemeContext';
 
 export const metadata: Metadata = {
   title: 'Imprint — Personal AI Computational Resource Ledger',
@@ -22,8 +23,8 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="min-h-screen bg-[#0B0D0C] text-[#F1F3F1] antialiased selection:bg-[#284D39] selection:text-[#A8D5BA]">
-        {children}
+      <body className="min-h-screen bg-[var(--bg-page)] text-[var(--text-primary)] antialiased transition-colors duration-200 selection:bg-[#284D39] selection:text-[#A8D5BA]">
+        <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>
   );

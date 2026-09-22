@@ -79,3 +79,87 @@ export const ECHARTS_DARK_THEME: EChartsOption = {
     '#EC4899', // Pink
   ],
 };
+
+export const ECHARTS_LIGHT_THEME: EChartsOption = {
+  backgroundColor: 'transparent',
+  textStyle: {
+    color: '#64748B',
+    fontFamily: 'ui-monospace, Menlo, Monaco, Consolas, monospace',
+  },
+  title: {
+    textStyle: {
+      color: '#0F172A',
+      fontWeight: 'bold',
+      fontSize: 13,
+    },
+    subtextStyle: {
+      color: '#64748B',
+      fontSize: 11,
+    },
+  },
+  tooltip: {
+    backgroundColor: '#FFFFFF',
+    borderColor: '#E2E8F0',
+    borderWidth: 1,
+    textStyle: {
+      color: '#0F172A',
+      fontSize: 11,
+      fontFamily: 'ui-monospace, Menlo, Monaco, Consolas, monospace',
+    },
+    padding: [8, 12],
+    extraCssText: 'box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08); border-radius: 6px;',
+  },
+  grid: {
+    top: 35,
+    right: 20,
+    bottom: 30,
+    left: 45,
+  },
+  categoryAxis: {
+    axisLine: {
+      lineStyle: {
+        color: '#CBD5E1',
+      },
+    },
+    axisTick: {
+      show: false,
+    },
+    axisLabel: {
+      color: '#64748B',
+      fontSize: 10,
+    },
+    splitLine: {
+      show: false,
+    },
+  },
+  valueAxis: {
+    axisLine: {
+      show: false,
+    },
+    axisTick: {
+      show: false,
+    },
+    axisLabel: {
+      color: '#64748B',
+      fontSize: 10,
+    },
+    splitLine: {
+      lineStyle: {
+        color: '#F1F5F9',
+        type: 'dashed',
+      },
+    },
+  },
+  color: [
+    '#059669', // Emerald CodeCarbon green
+    '#D97706', // Warm amber
+    '#10B981', // Crisp green
+    '#2563EB', // Water blue
+    '#7C3AED', // Violet
+    '#DB2777', // Pink
+  ],
+};
+
+export function getEChartsTheme(theme: 'dark' | 'light'): EChartsOption {
+  return theme === 'light' ? ECHARTS_LIGHT_THEME : ECHARTS_DARK_THEME;
+}
