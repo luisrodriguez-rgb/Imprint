@@ -8,6 +8,7 @@ export const JOULE_FRONTIER_2026: Methodology = {
     'Peer-reviewed empirical study published in Joule (April 2026) modeling energy consumption across frontier LLMs, distinguishing standard decoding from deep long-reasoning queries.',
   boundary: 'operational',
   primaryScope: 'operational',
+  methodologyType: 'peer_reviewed_study',
   metricsSupported: ['energy_wh', 'water_consumption_ml', 'water_withdrawal_ml', 'carbon_g_co2e'],
   assumptions: [
     'Standard conversational query median energy consumption: 0.31 Wh.',

@@ -28,7 +28,8 @@ export function calculateMineralDepletion(
       'mg Sb-eq',
       'methodology_model',
       'lifecycle',
-      4
+      4,
+      'experimental_modeled'
     ),
   };
 }

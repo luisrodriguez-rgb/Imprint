@@ -1,8 +1,9 @@
-import { DataProvenance, ImpactScope, MetricValue } from '@imprint/schemas';
+import { DataProvenance, EpistemicStatus, ImpactScope, MetricValue } from '@imprint/schemas';
 
 /**
- * Creates a bounded MetricValue with [min, expected, max] based on a central value
- * and a methodology-defined variance percentage.
+ * Creates a bounded MetricValue with [min, expected, max] based on a central value,
+ * a methodology-defined variance percentage or explicit bounds override,
+ * and an explicit epistemic status.
  */
 export function createMetricValue(
   expected: number,
@@ -10,16 +11,26 @@ export function createMetricValue(
   unit: string,
   provenance: DataProvenance,
   scope: ImpactScope,
-  decimals: number = 2
+  decimals: number = 2,
+  epistemicStatus: EpistemicStatus = 'modeled',
+  boundsOverride?: { min: number; max: number }
 ): MetricValue {
-  const factor = Math.max(0, variancePct) / 100;
-  const min = Math.max(0, expected * (1 - factor));
-  const max = expected * (1 + factor);
-
   const round = (val: number) => {
     const p = Math.pow(10, decimals);
     return Math.round(val * p) / p;
   };
+
+  let min: number;
+  let max: number;
+
+  if (boundsOverride) {
+    min = Math.max(0, boundsOverride.min);
+    max = Math.max(min, boundsOverride.max);
+  } else {
+    const factor = Math.max(0, variancePct) / 100;
+    min = Math.max(0, expected * (1 - factor));
+    max = expected * (1 + factor);
+  }
 
   return {
     min: round(min),
@@ -28,5 +39,7 @@ export function createMetricValue(
     unit,
     provenance,
     scope,
+    epistemicStatus,
   };
 }
+

@@ -8,6 +8,7 @@ export const GOOGLE_OPERATIONAL_2025: Methodology = {
     'Empirical measurement of Gemini Apps text inference in Google data centers, capturing TPU silicon, CPU/RAM host power, idle server allocation, PUE, and direct onsite cooling tower water evaporation.',
   boundary: 'operational',
   primaryScope: 'datacenter',
+  methodologyType: 'corporate_disclosure',
   metricsSupported: ['energy_wh', 'water_consumption_ml', 'carbon_g_co2e'],
   assumptions: [
     'Median text interaction uses 0.24 Wh electrical energy (operational + PUE overhead).',

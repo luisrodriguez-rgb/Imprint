@@ -1,4 +1,4 @@
-import { CarbonMetrics, Methodology } from '@imprint/schemas';
+import { CarbonMetrics, InferenceGeography, Methodology } from '@imprint/schemas';
 import { createMetricValue } from './uncertainty';
 
 export interface CarbonCalculationParams {
@@ -7,6 +7,7 @@ export interface CarbonCalculationParams {
   outputTokens: number;
   methodology: Methodology;
   gridCarbonIntensityGPerKwh?: number; // e.g. 380 g CO2e / kWh
+  geography?: InferenceGeography;
 }
 
 export function calculateCarbon(params: CarbonCalculationParams): CarbonMetrics {
@@ -15,13 +16,22 @@ export function calculateCarbon(params: CarbonCalculationParams): CarbonMetrics 
     inputTokens,
     outputTokens,
     methodology,
-    gridCarbonIntensityGPerKwh = 380, // Default average grid carbon intensity
+    gridCarbonIntensityGPerKwh,
+    geography,
   } = params;
 
   const variance = methodology.uncertaintyModel.carbonVariancePct;
+  const isGeographyUnknown = !geography || geography.status === 'unknown';
+
+  // Resolved intensity: provider-reported override > explicit param > global default (380 g/kWh)
+  const resolvedIntensity =
+    geography?.gridCarbonIntensityGPerKwh ??
+    gridCarbonIntensityGPerKwh ??
+    380;
 
   let operationalG = 0;
   let embodiedG: number | undefined = undefined;
+  let boundsOverride: { min: number; max: number } | undefined = undefined;
 
   switch (methodology.id) {
     case 'mistral-lca-2026': {
@@ -36,7 +46,17 @@ export function calculateCarbon(params: CarbonCalculationParams): CarbonMetrics 
     default: {
       // Energy in kWh = totalEnergyWh / 1000
       // Operational carbon = kWh * grid intensity
-      operationalG = (totalEnergyWh / 1000) * gridCarbonIntensityGPerKwh;
+      const energyKwh = totalEnergyWh / 1000;
+      operationalG = energyKwh * resolvedIntensity;
+
+      // When datacenter physical location is unknown, hyperscale fleet variance
+      // spans from hydro/nuclear regions (~160 g/kWh) to fossil-peaker grids (~580 g/kWh)
+      if (isGeographyUnknown) {
+        boundsOverride = {
+          min: energyKwh * 160,
+          max: energyKwh * 580,
+        };
+      }
       break;
     }
   }
@@ -48,9 +68,11 @@ export function calculateCarbon(params: CarbonCalculationParams): CarbonMetrics 
       operationalG,
       variance,
       'g CO2e',
-      'methodology_model',
+      geography?.status === 'provider_reported' ? 'provider_api' : 'methodology_model',
       'grid',
-      3
+      3,
+      'modeled',
+      boundsOverride
     ),
     lifecycleEmbodied: embodiedG !== undefined
       ? createMetricValue(
@@ -59,7 +81,8 @@ export function calculateCarbon(params: CarbonCalculationParams): CarbonMetrics 
           'g CO2e',
           'methodology_model',
           'lifecycle',
-          3
+          3,
+          'modeled'
         )
       : undefined,
     total: createMetricValue(
@@ -68,7 +91,14 @@ export function calculateCarbon(params: CarbonCalculationParams): CarbonMetrics 
       'g CO2e',
       'methodology_model',
       embodiedG !== undefined ? 'lifecycle' : 'grid',
-      3
+      3,
+      'modeled',
+      boundsOverride
+        ? {
+            min: boundsOverride.min + (embodiedG ? embodiedG * (1 - variance / 100) : 0),
+            max: boundsOverride.max + (embodiedG ? embodiedG * (1 + variance / 100) : 0),
+          }
+        : undefined
     ),
   };
 }

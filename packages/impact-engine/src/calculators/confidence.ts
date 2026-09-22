@@ -3,6 +3,8 @@ import {
   ConfidenceChecklistItem,
   ConfidenceLevel,
   DataProvenance,
+  EpistemicBucket,
+  InferenceGeography,
 } from '@imprint/schemas';
 
 export interface ConfidenceEvaluationParams {
@@ -11,6 +13,9 @@ export interface ConfidenceEvaluationParams {
   inputProvenance: DataProvenance;
   outputProvenance: DataProvenance;
   datacenterKnown?: boolean;
+  geography?: InferenceGeography;
+  reasoningProvenance?: string;
+  reasoningIncludedInOutput?: boolean | 'unknown';
 }
 
 export function evaluateConfidence(
@@ -22,7 +27,12 @@ export function evaluateConfidence(
     inputProvenance,
     outputProvenance,
     datacenterKnown = false,
+    geography,
+    reasoningProvenance,
+    reasoningIncludedInOutput,
   } = params;
+
+  const isGeoKnown = datacenterKnown || (geography && geography.status === 'provider_reported');
 
   const checklist: ConfidenceChecklistItem[] = [
     {
@@ -56,11 +66,11 @@ export function evaluateConfidence(
     {
       id: 'datacenter-location',
       title: 'Datacenter Region & Thermal Specs',
-      status: datacenterKnown ? 'verified' : 'assumed',
-      passed: datacenterKnown,
-      description: datacenterKnown
-        ? 'Datacenter location and local cooling efficiency verified'
-        : 'Datacenter location unspecified; using provider fleet average WUE & PUE',
+      status: isGeoKnown ? 'verified' : 'unknown',
+      passed: Boolean(isGeoKnown),
+      description: isGeoKnown
+        ? `Datacenter location verified${geography?.region ? ` (${geography.region})` : ''}`
+        : 'Datacenter location unspecified; decoupling user location from unknown inference grid',
     },
   ];
 
@@ -68,7 +78,7 @@ export function evaluateConfidence(
   if (modelDetected) score += 25;
   if (outputObserved) score += 20;
   if (inputProvenance === 'provider_api' || inputProvenance === 'provider_export') score += 25;
-  if (datacenterKnown) score += 10;
+  if (isGeoKnown) score += 10;
 
   let level: ConfidenceLevel = 'LOW';
   let summary = '';
@@ -84,10 +94,41 @@ export function evaluateConfidence(
     summary = 'Low fidelity: Inferred from generic frontier baseline; model or output not directly verified.';
   }
 
+  // Construct epistemic transparency buckets
+  const observed: string[] = ['DOM character counts and response stream completion'];
+  if (modelDetected) observed.push('Interface model badge/indicator observed');
+  if (outputObserved) observed.push('Assistant response completion event captured');
+
+  const estimated: string[] = ['Operational energy consumption (Wh) modeled from scientific coefficients'];
+  if (inputProvenance !== 'provider_api') estimated.push('Input prompt tokens estimated client-side from character ratios');
+  if (outputProvenance !== 'provider_api') estimated.push('Output tokens estimated client-side from character lengths');
+  if (reasoningProvenance === 'estimated') estimated.push('Reasoning tokens estimated client-side');
+
+  const assumed: string[] = [
+    'Hyperscale datacenter operational PUE efficiency (1.10 - 1.15)',
+    'Datacenter fleet-average Water Usage Effectiveness (WUE)',
+  ];
+  if (!isGeoKnown) assumed.push('Regional grid carbon intensity baseline (380 g CO2e/kWh)');
+
+  const unknown: string[] = [
+    'Real-time datacenter cooling mode (evaporative vs adiabatic vs dry chillers)',
+    'Dynamic GPU cluster concurrency and idle power allocation',
+  ];
+  if (!isGeoKnown) unknown.push('Exact physical datacenter facility and host machine location');
+  if (reasoningIncludedInOutput === 'unknown') unknown.push('Exact provider bundling of internal reasoning tokens');
+
+  const epistemic: EpistemicBucket = {
+    observed,
+    estimated,
+    assumed,
+    unknown,
+  };
+
   return {
     level,
     score,
     summary,
     checklist,
+    epistemic,
   };
 }

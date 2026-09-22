@@ -8,6 +8,7 @@ export const OPENAI_REFERENCE_2025: Methodology = {
     'Public baseline figures disclosed by OpenAI leadership (June 2025) for an "average ChatGPT query" (0.34 Wh electricity and ~0.32 mL / 0.000085 gallons water).',
   boundary: 'operational',
   primaryScope: 'datacenter',
+  methodologyType: 'corporate_disclosure',
   metricsSupported: ['energy_wh', 'water_consumption_ml', 'carbon_g_co2e'],
   assumptions: [
     '0.34 Wh electricity per average query.',

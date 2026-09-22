@@ -2,6 +2,7 @@ import {
   ConfidenceAssessment,
   DataProvenance,
   ImpactResult,
+  InferenceGeography,
   Methodology,
   PhysicalEquivalence,
 } from '@imprint/schemas';
@@ -17,10 +18,13 @@ export interface ImpactEngineInput {
   inputTokens: number;
   outputTokens: number;
   reasoningTokens?: number;
+  reasoningIncludedInOutput?: boolean | 'unknown';
+  reasoningProvenance?: 'provider_reported' | 'provider_export' | 'estimated' | 'unknown';
   modelFamily?: string | null;
   providerId?: string;
   methodologyId?: string;
   gridCarbonIntensityGPerKwh?: number;
+  geography?: InferenceGeography;
   inputProvenance?: DataProvenance;
   outputProvenance?: DataProvenance;
   modelDetected?: boolean;
@@ -40,6 +44,7 @@ export function estimateImpact(input: ImpactEngineInput): ImpactEngineOutput {
     inputTokens: input.inputTokens,
     outputTokens: input.outputTokens,
     reasoningTokens: input.reasoningTokens,
+    reasoningIncludedInOutput: input.reasoningIncludedInOutput,
     modelFamily: input.modelFamily,
     methodology,
   });
@@ -58,6 +63,7 @@ export function estimateImpact(input: ImpactEngineInput): ImpactEngineOutput {
     outputTokens: input.outputTokens,
     methodology,
     gridCarbonIntensityGPerKwh: input.gridCarbonIntensityGPerKwh,
+    geography: input.geography,
   });
 
   const minerals = calculateMineralDepletion({
@@ -71,6 +77,9 @@ export function estimateImpact(input: ImpactEngineInput): ImpactEngineOutput {
     outputObserved: input.outputProvenance === 'browser_observation',
     inputProvenance: input.inputProvenance || 'local_estimation',
     outputProvenance: input.outputProvenance || 'browser_observation',
+    geography: input.geography,
+    reasoningProvenance: input.reasoningProvenance,
+    reasoningIncludedInOutput: input.reasoningIncludedInOutput,
   });
 
   const equivalences = generatePhysicalEquivalences({

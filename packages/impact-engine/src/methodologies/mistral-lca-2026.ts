@@ -8,6 +8,7 @@ export const MISTRAL_LCA_2026: Methodology = {
     'Comprehensive Life Cycle Assessment (LCA) conducted by Mistral AI for Mistral Large 2 / Le Chat, encompassing upstream electricity generation water and embodied server manufacturing.',
   boundary: 'cradle-to-gate',
   primaryScope: 'lifecycle',
+  methodologyType: 'corporate_disclosure',
   metricsSupported: [
     'energy_wh',
     'water_consumption_ml',

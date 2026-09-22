@@ -5,12 +5,19 @@ export interface EnergyCalculationParams {
   inputTokens: number;
   outputTokens: number;
   reasoningTokens?: number;
+  reasoningIncludedInOutput?: boolean | 'unknown';
   modelFamily?: string | null;
   methodology: Methodology;
 }
 
 export function calculateEnergy(params: EnergyCalculationParams): EnergyMetrics {
-  const { inputTokens, outputTokens, reasoningTokens = 0, methodology } = params;
+  const {
+    inputTokens,
+    outputTokens,
+    reasoningTokens = 0,
+    reasoningIncludedInOutput = 'unknown',
+    methodology,
+  } = params;
   const variance = methodology.uncertaintyModel.energyVariancePct;
 
   let operationalWh = 0;
@@ -33,8 +40,17 @@ export function calculateEnergy(params: EnergyCalculationParams): EnergyMetrics 
       // Prefill: ~0.00003 Wh/token
       // Decode: ~0.00028 Wh/token
       // Reasoning: ~0.00072 Wh/token (intensive search / chain-of-thought)
+      // Epistemic fix: Prevent double counting when reasoning tokens are already bundled inside outputTokens
+      let pureDecodeTokens = outputTokens;
+      if (reasoningIncludedInOutput === true) {
+        pureDecodeTokens = Math.max(0, outputTokens - reasoningTokens);
+      } else if (reasoningIncludedInOutput === 'unknown' && outputTokens >= reasoningTokens && reasoningTokens > 0) {
+        // Conservative deduplication to prevent model inflation
+        pureDecodeTokens = Math.max(0, outputTokens - reasoningTokens);
+      }
+
       const prefillWh = inputTokens * 0.00003;
-      const decodeWh = outputTokens * 0.00028;
+      const decodeWh = pureDecodeTokens * 0.00028;
       const reasoningWh = reasoningTokens * 0.00072;
       const baseSystemOverheadWh = 0.22; // Static hardware & host power allocation
       operationalWh = baseSystemOverheadWh + prefillWh + decodeWh + reasoningWh;
