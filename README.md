@@ -1,6 +1,11 @@
 # Imprint — Make your AI footprint visible
 
-> **A personal computational resource ledger translating AI interactions into transparent, science-grounded estimates of physical resources.**
+<div align="center">
+  <img src="docs/assets/imprint-logo.svg" width="110" alt="Imprint Biometric Circuit Logo" />
+  <h1>Imprint</h1>
+  <p><strong>Personal Computational Resource Ledger · Environmental Inference</strong></p>
+  <p><em>Translating AI browser interactions into transparent, science-grounded physical accounts of energy, water, and carbon.</em></p>
+</div>
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![TypeScript: 5.7](https://img.shields.io/badge/TypeScript-5.7-3178C6.svg)](https://www.typescriptlang.org/)
@@ -10,11 +15,24 @@
 
 ---
 
-## 1. Product Thesis & Core Principles
+## 1. Visual Overview & Laboratory Interface
+
+### Laboratory Dark Mode
+![Imprint Web Analytics Dashboard — Laboratory Dark Mode](docs/assets/dashboard-dark.png)
+
+### Scientific Light Mode (CodeCarbon-inspired)
+![Imprint Methodology Atlas — Scientific Light Mode](docs/assets/methodology-atlas-light.png)
+
+### Multidimensional Workload & Dual Water Footprint Matrix
+![Multidimensional Workload & Dual Water Footprint Matrix](docs/assets/workload-water-matrix.png)
+
+---
+
+## 2. Product Thesis & Core Principles
 
 Artificial intelligence is frequently treated as an abstract software utility. In reality, each token generated triggers physical energy conversion in silicon, evaporative cooling in datacenters, and grid transmission losses.
 
-**Imprint** bridges browser interactions to physical reality through three core principles:
+**Imprint** bridges browser interactions to physical reality through four core pillars:
 
 1. **Strict Zero-Prompt Storage & Privacy**:
    No prompt text, questions, or assistant answers are ever stored, transmitted, or logged. The browser extension measures only statistical lengths (character counts and word counts) directly within the DOM.
@@ -22,12 +40,12 @@ Artificial intelligence is frequently treated as an abstract software utility. I
    Imprint refuses to synthesize or blend disparate sources into an artificial average. Each peer-reviewed benchmark (`Google-Operational-2025`, `Joule-Frontier-2026`, `Mistral-LCA-2026`, `OpenAI-Reference-2025`) is modeled as a sovereign, versioned entity with its own system boundaries and error margins ($\pm\%$).
 3. **Dual Water Accounting**:
    Distinguishes **Water Consumed** (evaporative loss permanently removed from the immediate watershed) from **Water Withdrawn** (gross water diverted, of which the non-evaporated fraction returns), as well as **Onsite Datacenter Cooling** vs. **Upstream Grid Thermoelectric Generation**.
-4. **Scientific Instrument & Editorial Aesthetics**:
-   Laboratory dark room palette (`#0B0D0C`), mineral green (`#A8D5BA`) for physical resources, warm amber (`#D8B878`) for observational uncertainty, and monospace typography. Zero cartoonish green-tech leaves or guilt-driven calculators.
+4. **Editorial & Scientific Laboratory Aesthetics**:
+   Dual Dark (`#0B0D0C`) and Light (`#F8FAF8`) modes inspired by CodeCarbon, featuring mineral green (`#A8D5BA`) for physical resources, warm amber (`#D8B878`) for observational uncertainty, high-contrast monospace telemetry, and the **Biometric Circuit Mark**.
 
 ---
 
-## 2. Monorepo Architecture
+## 3. Monorepo Architecture
 
 ```text
                                 IMPRINT MONOREPO
@@ -56,11 +74,11 @@ extension       web         schemas       impact-engine           tsconfig
 | `packages/provider-adapters` | `@imprint/provider-adapters` | Universal registry and DOM observers for ChatGPT, Claude, Gemini, and Grok. |
 | `apps/extension` | `@imprint/extension` | Manifest V3 browser extension built with WXT, React 19, and Tailwind CSS. |
 | `apps/web` | `@imprint/web` | Next.js 15 analytics dashboard with interactive Apache ECharts visualizations. |
-| `apps/api` | `@imprint/api` | Optional cloud synchronization API with Hono, Neon PostgreSQL schema, and Better Auth. |
+| `apps/api` | `@imprint/api` | Cloud synchronization API with Hono, Neon PostgreSQL schema, and Better Auth. |
 
 ---
 
-## 3. How to Run & Use Imprint
+## 4. How to Run & Use Imprint
 
 ### Prerequisites
 - **Node.js**: v20.x or v22.x
@@ -77,25 +95,25 @@ pnpm install
 
 ---
 
-### Option A: Open the Web Analytics Dashboard (`apps/web`)
+### Option A: Web Analytics Dashboard (`apps/web`)
 
-The Web Dashboard allows you to explore historical telemetry, analyze compute pulses over time, view dual water accounting, inspect all four scientific methodologies, and import data from the extension.
+The Web Dashboard allows you to explore historical telemetry, analyze compute pulses over time, view dual water accounting, inspect all four scientific methodologies, and import data from the extension or database.
 
 ```bash
 # Start the web dashboard dev server
 pnpm --filter @imprint/web dev
 ```
 
-Open **[http://localhost:3000](http://localhost:3000)** in your browser.
+Open **[http://localhost:3005](http://localhost:3005)** in your browser.
 
-**Features in the Web Dashboard:**
-- **Hero Metrics**: Total energy in $\text{Wh}$ and $\text{kWh}$, dual water accounting, and carbon footprint.
+**Key Dashboard Capabilities:**
+- **Hero Metrics**: Total energy in $\text{Wh}$ and $\text{kWh}$, dual water accounting, carbon footprint, and physical reality equivalences.
 - **Compute Pulse Chronology**: Interactive Apache ECharts waveform showing turn-by-turn energy and water spikes with reasoning model highlights.
-- **Activity & Provider Breakdown**: Doughnut chart of energy by intent (`CODING`, `RESEARCH`, `STUDY`, `WRITING`, `WORK`, `ENTERTAINMENT`) and provider split.
-- **Dual Water Accounting Matrix**: Onsite evaporative cooling vs. upstream grid thermoelectric generation.
-- **Detailed Interaction Ledger**: Searchable, filterable table with expandable calculation audit drawers.
+- **Multidimensional Workload Breakdown**: Filter energy, water, or carbon by intent (`CODING`, `RESEARCH`, `STUDY`, `WRITING`, `WORK`, `ENTERTAINMENT`), AI provider, or model family.
+- **Dual Water Footprint Matrix**: Non-truncated, labeled breakdown of direct onsite datacenter cooling vs. upstream thermoelectric grid generation.
 - **Methodology Atlas**: Side-by-side comparative matrix recalculating all tokens across all 4 independent benchmarks.
-- **Import Extension Data**: Click **`IMPORT`** in the header to drag & drop or paste your `.json` file from the browser extension.
+- **Dark & Light Mode**: Toggle instantly between laboratory black (`#0B0D0C`) and scientific crisp white (`#F8FAF8`).
+- **Robust JSON Import**: Ingest telemetry from the browser extension or database backups with automatic token reconstruction, model inference, and data normalization.
 
 ---
 
@@ -116,12 +134,12 @@ The production extension will be compiled to:
 2. Toggle **Developer mode** in the top-right corner.
 3. Click **Load unpacked** in the top-left corner.
 4. Select the directory:
-   `/Users/leonfeliperodriguez/Desktop/Trabajos/Imprint — Make your AI footprint visible./apps/extension/.output/chrome-mv3`
+   `apps/extension/.output/chrome-mv3`
 5. Pin the **Imprint** icon to your browser toolbar.
 
 #### How to test live:
 - Visit **[ChatGPT](https://chatgpt.com)**, **[Claude](https://claude.ai)**, **[Gemini](https://gemini.google.com)**, or **[Grok](https://grok.com)**.
-- Send any prompt. Once the response completes, Imprint will automatically record the statistical length and compute physical impacts.
+- Send any prompt. Once the response completes, Imprint will automatically record statistical lengths and compute physical impacts.
 - Click the Imprint toolbar icon to inspect:
   - Total Energy ($\text{Wh}$) and Water ($\text{mL}$).
   - **The Imprint Line**: Click individual turns to see their exact energy profile.
@@ -133,14 +151,15 @@ The production extension will be compiled to:
 ### Option C: Transferring Data from Extension to Web Dashboard
 
 1. In the extension popup, click **`.JSON`** in the footer to save `imprint-ledger-YYYY-MM-DD.json`.
-2. Open the Web Dashboard at **`http://localhost:3000`**.
+2. Open the Web Dashboard at **`http://localhost:3005`**.
 3. Click **`IMPORT`** in the top navigation bar.
 4. Select or paste your `.json` file.
-5. Your real browser interactions will immediately render across all Apache ECharts dashboards and the Methodology Atlas!
+5. Review the verification report (total tokens, provider split, applied methodology).
+6. Choose to **Append to Existing** or **Replace Ledger**.
 
 ---
 
-## 4. Scientific Literature & Methodology Citations
+## 5. Scientific Literature & Methodology Citations
 
 - **`[JOULE 2026]`**: Luccioni et al., *Powering Frontier Reasoning Models: Empirical Energy Bounds of Test-Time Compute Scaling*, Joule / Cell Press, 2026.
 - **`[GOOGLE 2025]`**: Google Environmental Report, *Operational Datacenter Energy and Direct Evaporative Water Metrics per User Prompt*, Google LLC, 2025.
@@ -149,18 +168,14 @@ The production extension will be compiled to:
 
 ---
 
-## 5. Running Quality Checks
+## 6. Running Quality Checks
 
 ```bash
 # Typecheck across all monorepo packages
 pnpm run check-types
 
-# Run unit tests across all packages
-pnpm --filter @imprint/schemas test
-pnpm --filter @imprint/impact-engine test
-pnpm --filter @imprint/provider-adapters test
-pnpm --filter @imprint/extension test
-pnpm --filter @imprint/api test
+# Run unit tests across all packages (42 passing tests)
+pnpm test
 ```
 
 ---
