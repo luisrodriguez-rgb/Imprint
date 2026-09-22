@@ -1,0 +1,52 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #0b0d0c;
+  --surface-1: #111513;
+  --surface-2: #171b19;
+  --surface-3: #1e2421;
+  --border: #29302c;
+  --mineral: #a8d5ba;
+  --mineral-strong: #6fb58a;
+  --amber: #d8b878;
+}
+
+body {
+  background-color: var(--background);
+  color: #f1f3f1;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+}
+
+/* Monospace telemetry numbers */
+.telemetry-num {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  letter-spacing: -0.02em;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0b0d0c;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #29302c;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #3a443f;
+}
+
+/* Grid background texture */
+.bg-grid-pattern {
+  background-image: linear-gradient(to right, #171b19 1px, transparent 1px),
+    linear-gradient(to bottom, #171b19 1px, transparent 1px);
+  background-size: 32px 32px;
+}
