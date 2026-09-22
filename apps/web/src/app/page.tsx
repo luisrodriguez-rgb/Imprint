@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { LedgerEvent } from '@imprint/schemas';
-import { estimateImpact } from '@imprint/impact-engine';
+import { estimateImpact, ALL_METHODOLOGIES } from '@imprint/impact-engine';
 import { generateSeedLedgerEvents } from '../lib/demo-data';
 import { Header } from '../components/Header';
 import { MetricCards } from '../components/MetricCards';
@@ -43,8 +43,8 @@ export default function DashboardPage() {
   // When methodology changes, recalculate impact for all current events
   function handleMethodologyChange(newMethodologyId: string) {
     setSelectedMethodologyId(newMethodologyId);
-    setEvents((prev) =>
-      prev.map((ev) => {
+    setEvents((prev) => {
+      const recalculated = prev.map((ev) => {
         const calc = estimateImpact({
           inputTokens: ev.input.estimatedTokens,
           outputTokens: ev.output.estimatedTokens,
@@ -61,39 +61,30 @@ export default function DashboardPage() {
           impact: calc.impact,
           confidence: calc.confidence,
         };
-      })
-    );
+      });
+      localStorage.setItem('imprint_web_ledger', JSON.stringify(recalculated));
+      return recalculated;
+    });
   }
 
-  // Handle imported events from extension
-  function handleImportEvents(newEvents: LedgerEvent[]) {
-    // Re-evaluate with current methodology
-    const evaluated = newEvents.map((ev) => {
-      const calc = estimateImpact({
-        inputTokens: ev.input.estimatedTokens,
-        outputTokens: ev.output.estimatedTokens,
-        reasoningTokens: ev.output.reasoningTokens || 0,
-        modelFamily: ev.modelFamily,
-        providerId: ev.provider,
-        methodologyId: selectedMethodologyId,
-        inputProvenance: ev.input.provenance,
-        outputProvenance: ev.output.provenance,
-        modelDetected: ev.modelRaw !== null,
-      });
-      return {
-        ...ev,
-        impact: calc.impact,
-        confidence: calc.confidence,
-      };
-    });
+  // Handle imported events with append or replace
+  function handleImportEvents(newEvents: LedgerEvent[], mode: 'replace' | 'append') {
+    let finalEvents: LedgerEvent[];
+    if (mode === 'replace') {
+      finalEvents = newEvents;
+    } else {
+      const newIds = new Set(newEvents.map((e) => e.id));
+      finalEvents = [...newEvents, ...events.filter((e) => !newIds.has(e.id))];
+    }
 
-    setEvents(evaluated);
-    localStorage.setItem('imprint_web_ledger', JSON.stringify(evaluated));
+    setEvents(finalEvents);
+    localStorage.setItem('imprint_web_ledger', JSON.stringify(finalEvents));
   }
 
   // Export handlers
   function handleExportJSON() {
-    const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(events, null, 2));
+    const dataStr =
+      'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(events, null, 2));
     downloadFile(dataStr, `imprint-web-ledger-${new Date().toISOString().slice(0, 10)}.json`);
   }
 
@@ -160,14 +151,17 @@ export default function DashboardPage() {
 
   if (!isMounted) {
     return (
-      <div className="min-h-screen bg-[#0B0D0C] flex items-center justify-center font-mono text-xs text-[#8D9690]">
+      <div className="min-h-screen bg-[var(--bg-page)] flex items-center justify-center font-mono text-xs text-[#64748B] dark:text-[#8D9690]">
         INITIALIZING SCIENTIFIC INSTRUMENT...
       </div>
     );
   }
 
+  const activeMethodology =
+    ALL_METHODOLOGIES.find((m) => m.id === selectedMethodologyId) || ALL_METHODOLOGIES[0];
+
   return (
-    <div className="min-h-screen flex flex-col bg-[#0B0D0C] text-[#F1F3F1]">
+    <div className="min-h-screen flex flex-col bg-[var(--bg-page)] text-[var(--text-primary)] transition-colors duration-200">
       <Header
         activeTab={activeTab}
         setActiveTab={setActiveTab}
@@ -179,7 +173,7 @@ export default function DashboardPage() {
         eventCount={events.length}
       />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto p-6 flex flex-col gap-6">
+      <main className="flex-1 max-w-7xl w-full mx-auto p-5 sm:p-6 flex flex-col gap-6">
         {activeTab === 'analytics' ? (
           <>
             {/* 1. Hero KPI Cards */}
@@ -190,7 +184,10 @@ export default function DashboardPage() {
 
             {/* 3. Activity & Dual Water Split */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <ActivityBreakdown events={events} />
+              <ActivityBreakdown
+                events={events}
+                activeMethodologyName={activeMethodology.name}
+              />
               <DualWaterChart events={events} />
             </div>
 
@@ -208,11 +205,13 @@ export default function DashboardPage() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-[#29302C] bg-[#0B0D0C] px-6 py-4 mt-auto">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-mono text-[#8D9690]">
+      <footer className="border-t border-[#E2E8E4] dark:border-[#29302C] bg-white dark:bg-[#0B0D0C] px-6 py-4 mt-auto transition-colors">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-mono text-[#64748B] dark:text-[#8D9690]">
           <div className="flex items-center gap-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#A8D5BA]" />
-            <span>IMPRINT · PERSONAL COMPUTATIONAL RESOURCE LEDGER</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-[#059669] dark:bg-[#A8D5BA]" />
+            <span className="font-semibold tracking-wide">
+              IMPRINT · PERSONAL COMPUTATIONAL RESOURCE LEDGER
+            </span>
           </div>
           <div className="flex items-center gap-4 text-[11px]">
             <span>Local & Privacy-Preserving</span>
@@ -229,6 +228,7 @@ export default function DashboardPage() {
         isOpen={isImportOpen}
         onClose={() => setIsImportOpen(false)}
         onImport={handleImportEvents}
+        activeMethodologyId={selectedMethodologyId}
       />
     </div>
   );

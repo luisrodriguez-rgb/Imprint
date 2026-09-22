@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { LedgerEvent, ProviderId, ActivityCategory } from '@imprint/schemas';
-import { ChevronDown, ChevronUp, Search, Filter } from 'lucide-react';
+import { LedgerEvent } from '@imprint/schemas';
+import { Search } from 'lucide-react';
 
 interface LedgerTableProps {
   events: LedgerEvent[];
@@ -27,15 +27,15 @@ export function LedgerTable({ events }: LedgerTableProps) {
   });
 
   return (
-    <div className="bg-[#111513] border border-[#29302C] rounded-xl overflow-hidden flex flex-col">
+    <div className="bg-white dark:bg-[#111513] border border-[#E2E8E4] dark:border-[#29302C] rounded-xl overflow-hidden flex flex-col shadow-xs dark:shadow-none transition-colors">
       {/* Table Header Controls */}
-      <div className="p-4 border-b border-[#29302C] flex flex-col md:flex-row md:items-center justify-between gap-3 bg-[#111513]">
+      <div className="p-4 border-b border-[#E2E8E4] dark:border-[#29302C] flex flex-col md:flex-row md:items-center justify-between gap-3 bg-[#F8FAF9] dark:bg-[#111513]">
         <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-[#A8D5BA]" />
-          <h2 className="text-xs font-mono font-bold text-[#F1F3F1] uppercase tracking-wider">
+          <span className="w-2 h-2 rounded-full bg-[#059669] dark:bg-[#A8D5BA]" />
+          <h2 className="text-xs font-mono font-bold text-[#111815] dark:text-[#F1F3F1] uppercase tracking-wider">
             Interaction Ledger Records
           </h2>
-          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#0B0D0C] border border-[#29302C] text-[#8D9690]">
+          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white dark:bg-[#0B0D0C] border border-[#E2E8E4] dark:border-[#29302C] text-[#64748B] dark:text-[#8D9690]">
             {filteredEvents.length} OF {events.length}
           </span>
         </div>
@@ -43,14 +43,14 @@ export function LedgerTable({ events }: LedgerTableProps) {
         {/* Filters */}
         <div className="flex flex-wrap items-center gap-2 text-xs font-mono">
           {/* Search box */}
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#0B0D0C] border border-[#29302C] text-[#8D9690] focus-within:border-[#A8D5BA] transition-colors">
-            <Search className="w-3 h-3 text-[#8D9690]" />
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-white dark:bg-[#0B0D0C] border border-[#E2E8E4] dark:border-[#29302C] text-[#64748B] dark:text-[#8D9690] focus-within:border-[#059669] dark:focus-within:border-[#A8D5BA] transition-colors">
+            <Search className="w-3 h-3 text-[#64748B] dark:text-[#8D9690]" />
             <input
               type="text"
               placeholder="Filter by model, session..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="bg-transparent text-xs text-[#F1F3F1] focus:outline-none w-36 placeholder:text-[#4E5752]"
+              className="bg-transparent text-xs text-[#111815] dark:text-[#F1F3F1] focus:outline-none w-36 placeholder:text-[#94A3B8] dark:placeholder:text-[#4E5752]"
             />
           </div>
 
@@ -58,7 +58,7 @@ export function LedgerTable({ events }: LedgerTableProps) {
           <select
             value={providerFilter}
             onChange={(e) => setProviderFilter(e.target.value)}
-            className="px-2 py-1 rounded bg-[#0B0D0C] border border-[#29302C] text-[#8D9690] text-xs cursor-pointer focus:outline-none"
+            className="px-2 py-1 rounded bg-white dark:bg-[#0B0D0C] border border-[#E2E8E4] dark:border-[#29302C] text-[#111815] dark:text-[#8D9690] text-xs cursor-pointer focus:outline-none"
           >
             <option value="all">ALL PROVIDERS</option>
             <option value="chatgpt">CHATGPT</option>
@@ -71,7 +71,7 @@ export function LedgerTable({ events }: LedgerTableProps) {
           <select
             value={activityFilter}
             onChange={(e) => setActivityFilter(e.target.value)}
-            className="px-2 py-1 rounded bg-[#0B0D0C] border border-[#29302C] text-[#8D9690] text-xs cursor-pointer focus:outline-none"
+            className="px-2 py-1 rounded bg-white dark:bg-[#0B0D0C] border border-[#E2E8E4] dark:border-[#29302C] text-[#111815] dark:text-[#8D9690] text-xs cursor-pointer focus:outline-none"
           >
             <option value="all">ALL ACTIVITIES</option>
             <option value="coding">CODING</option>
@@ -88,7 +88,7 @@ export function LedgerTable({ events }: LedgerTableProps) {
       <div className="overflow-x-auto">
         <table className="w-full text-left font-mono text-[11px] border-collapse">
           <thead>
-            <tr className="border-b border-[#1F2421] text-[#8D9690] text-[10px] bg-[#0E1110]">
+            <tr className="border-b border-[#E2E8E4] dark:border-[#1F2421] text-[#64748B] dark:text-[#8D9690] text-[10px] bg-[#F8FAF9] dark:bg-[#0E1110]">
               <th className="py-2.5 px-4 font-semibold uppercase">Turn & Time</th>
               <th className="py-2.5 px-3 font-semibold uppercase">Provider / Model</th>
               <th className="py-2.5 px-3 font-semibold uppercase">Intent</th>
@@ -99,7 +99,7 @@ export function LedgerTable({ events }: LedgerTableProps) {
               <th className="py-2.5 px-4 font-semibold uppercase text-center">Fidelity</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-[#171B19]">
+          <tbody className="divide-y divide-[#E2E8E4] dark:divide-[#171B19]">
             {filteredEvents.map((ev) => {
               const d = new Date(ev.timestamp);
               const timeStr = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -110,50 +110,50 @@ export function LedgerTable({ events }: LedgerTableProps) {
                 <React.Fragment key={ev.id}>
                   <tr
                     onClick={() => setExpandedTurnId(isExpanded ? null : ev.id)}
-                    className={`hover:bg-[#171B19] cursor-pointer transition-colors ${
-                      isExpanded ? 'bg-[#171B19]' : ''
+                    className={`hover:bg-[#F1F5F3] dark:hover:bg-[#171B19] cursor-pointer transition-colors ${
+                      isExpanded ? 'bg-[#F1F5F3] dark:bg-[#171B19]' : ''
                     }`}
                   >
-                    <td className="py-2.5 px-4 text-[#8D9690] whitespace-nowrap">
-                      <div className="text-[#F1F3F1] font-semibold">#{ev.interactionIndex}</div>
-                      <div className="text-[9px] text-[#4E5752]">{dateStr} {timeStr}</div>
+                    <td className="py-2.5 px-4 text-[#64748B] dark:text-[#8D9690] whitespace-nowrap">
+                      <div className="text-[#111815] dark:text-[#F1F3F1] font-semibold">#{ev.interactionIndex}</div>
+                      <div className="text-[9px] text-[#94A3B8] dark:text-[#4E5752]">{dateStr} {timeStr}</div>
                     </td>
 
                     <td className="py-2.5 px-3 whitespace-nowrap">
                       <div className="flex items-center gap-1.5">
-                        <span className="text-[9px] px-1 py-0.2 rounded border border-[#29302C] bg-[#0B0D0C] text-[#A8D5BA] uppercase font-bold">
+                        <span className="text-[9px] px-1 py-0.2 rounded border border-[#E2E8E4] dark:border-[#29302C] bg-white dark:bg-[#0B0D0C] text-[#059669] dark:text-[#A8D5BA] uppercase font-bold">
                           {ev.provider}
                         </span>
-                        <span className="text-[#F1F3F1]">{ev.modelRaw || ev.modelFamily || 'Generic'}</span>
+                        <span className="text-[#111815] dark:text-[#F1F3F1]">{ev.modelRaw || ev.modelFamily || 'Generic'}</span>
                       </div>
                     </td>
 
                     <td className="py-2.5 px-3 whitespace-nowrap">
-                      <span className="text-[9px] px-1.5 py-0.5 rounded border border-[#29302C] bg-[#0B0D0C] text-[#8D9690] uppercase">
+                      <span className="text-[9px] px-1.5 py-0.5 rounded border border-[#E2E8E4] dark:border-[#29302C] bg-white dark:bg-[#0B0D0C] text-[#64748B] dark:text-[#8D9690] uppercase font-medium">
                         {ev.activity.category}
                       </span>
                     </td>
 
-                    <td className="py-2.5 px-3 text-right text-[#8D9690] whitespace-nowrap">
-                      <span className="text-[#F1F3F1]">{ev.input.estimatedTokens}</span>
-                      <span className="text-[#4E5752]"> / </span>
-                      <span className="text-[#A8D5BA]">{ev.output.estimatedTokens}</span>
+                    <td className="py-2.5 px-3 text-right text-[#64748B] dark:text-[#8D9690] whitespace-nowrap">
+                      <span className="text-[#111815] dark:text-[#F1F3F1]">{ev.input.estimatedTokens}</span>
+                      <span className="text-[#94A3B8] dark:text-[#4E5752]"> / </span>
+                      <span className="text-[#059669] dark:text-[#A8D5BA]">{ev.output.estimatedTokens}</span>
                       {ev.output.reasoningTokens ? (
-                        <span className="text-[#D8B878] text-[9px] ml-1">
+                        <span className="text-[#D97706] dark:text-[#D8B878] text-[9px] ml-1">
                           (+{ev.output.reasoningTokens} r)
                         </span>
                       ) : null}
                     </td>
 
-                    <td className="py-2.5 px-3 text-right text-[#A8D5BA] font-bold whitespace-nowrap">
+                    <td className="py-2.5 px-3 text-right text-[#059669] dark:text-[#A8D5BA] font-bold whitespace-nowrap">
                       {ev.impact.energy.total.expected}
                     </td>
 
-                    <td className="py-2.5 px-3 text-right text-[#3B82F6] font-bold whitespace-nowrap">
+                    <td className="py-2.5 px-3 text-right text-[#2563EB] dark:text-[#3B82F6] font-bold whitespace-nowrap">
                       {ev.impact.water.consumption.total.expected}
                     </td>
 
-                    <td className="py-2.5 px-3 text-right text-[#D8B878] whitespace-nowrap">
+                    <td className="py-2.5 px-3 text-right text-[#D97706] dark:text-[#D8B878] whitespace-nowrap">
                       {ev.impact.carbon.total.expected}
                     </td>
 
@@ -161,10 +161,10 @@ export function LedgerTable({ events }: LedgerTableProps) {
                       <span
                         className={`text-[9px] px-1.5 py-0.5 rounded uppercase font-semibold ${
                           ev.confidence.level === 'HIGH'
-                            ? 'bg-[#1E2E24] text-[#A8D5BA] border border-[#284D39]'
+                            ? 'bg-emerald-50 dark:bg-[#1E2E24] text-[#059669] dark:text-[#A8D5BA] border border-emerald-200 dark:border-[#284D39]'
                             : ev.confidence.level === 'MEDIUM'
-                            ? 'bg-[#2E2818] text-[#D8B878] border border-[#4A3B1C]'
-                            : 'bg-[#2B1B1B] text-red-300 border border-red-900/40'
+                            ? 'bg-amber-50 dark:bg-[#2E2818] text-[#D97706] dark:text-[#D8B878] border border-amber-200 dark:border-[#4A3B1C]'
+                            : 'bg-red-50 dark:bg-[#2B1B1B] text-red-600 dark:text-red-300 border border-red-200 dark:border-red-900/40'
                         }`}
                       >
                         {ev.confidence.level}
@@ -174,29 +174,29 @@ export function LedgerTable({ events }: LedgerTableProps) {
 
                   {/* Expanded Calculation Details */}
                   {isExpanded && (
-                    <tr className="bg-[#0E1110] border-y border-[#29302C]">
+                    <tr className="bg-[#F8FAF9] dark:bg-[#0E1110] border-y border-[#E2E8E4] dark:border-[#29302C]">
                       <td colSpan={8} className="p-4">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs font-mono">
                           {/* 1. Input & DOM Telemetry */}
-                          <div className="p-3 rounded bg-[#111513] border border-[#29302C] flex flex-col gap-1.5">
-                            <div className="text-[10px] text-[#A8D5BA] uppercase font-bold">
+                          <div className="p-3 rounded bg-white dark:bg-[#111513] border border-[#E2E8E4] dark:border-[#29302C] flex flex-col gap-1.5">
+                            <div className="text-[10px] text-[#059669] dark:text-[#A8D5BA] uppercase font-bold">
                               DOM Statistical Counters
                             </div>
-                            <div className="text-[#8D9690] text-[11px] leading-relaxed">
+                            <div className="text-[#64748B] dark:text-[#8D9690] text-[11px] leading-relaxed">
                               <div>Prompt Length: {ev.input.charCount} chars (~{ev.input.wordCount} words)</div>
                               <div>Assistant Length: {ev.output.charCount} chars (~{ev.output.wordCount} words)</div>
-                              <div>Input Provenance: <span className="text-[#F1F3F1]">{ev.input.provenance}</span></div>
-                              <div>Output Provenance: <span className="text-[#F1F3F1]">{ev.output.provenance}</span></div>
-                              <div className="text-[9px] text-[#A8D5BA] mt-1">🔒 Zero text persisted</div>
+                              <div>Input Provenance: <span className="text-[#111815] dark:text-[#F1F3F1]">{ev.input.provenance}</span></div>
+                              <div>Output Provenance: <span className="text-[#111815] dark:text-[#F1F3F1]">{ev.output.provenance}</span></div>
+                              <div className="text-[9px] text-[#059669] dark:text-[#A8D5BA] mt-1">🔒 Zero prompt text persisted</div>
                             </div>
                           </div>
 
                           {/* 2. Impact Breakdown */}
-                          <div className="p-3 rounded bg-[#111513] border border-[#29302C] flex flex-col gap-1.5">
-                            <div className="text-[10px] text-[#3B82F6] uppercase font-bold">
+                          <div className="p-3 rounded bg-white dark:bg-[#111513] border border-[#E2E8E4] dark:border-[#29302C] flex flex-col gap-1.5">
+                            <div className="text-[10px] text-[#2563EB] dark:text-[#3B82F6] uppercase font-bold">
                               Calculated Impact Detail
                             </div>
-                            <div className="text-[#8D9690] text-[11px] leading-relaxed">
+                            <div className="text-[#64748B] dark:text-[#8D9690] text-[11px] leading-relaxed">
                               <div>Operational Energy: {ev.impact.energy.operational.expected} Wh</div>
                               <div>Datacenter PUE Overhead: {ev.impact.energy.datacenterPueOverhead.expected} Wh</div>
                               <div>Water Onsite: {ev.impact.water.consumption.onsite.expected} mL</div>
@@ -206,17 +206,17 @@ export function LedgerTable({ events }: LedgerTableProps) {
                           </div>
 
                           {/* 3. Audit Checklist */}
-                          <div className="p-3 rounded bg-[#111513] border border-[#29302C] flex flex-col gap-1.5">
-                            <div className="text-[10px] text-[#D8B878] uppercase font-bold">
+                          <div className="p-3 rounded bg-white dark:bg-[#111513] border border-[#E2E8E4] dark:border-[#29302C] flex flex-col gap-1.5">
+                            <div className="text-[10px] text-[#D97706] dark:text-[#D8B878] uppercase font-bold">
                               Confidence Audit Checklist
                             </div>
                             <div className="flex flex-col gap-1 text-[10px]">
                               {ev.confidence.checklist.map((item, i) => (
                                 <div key={i} className="flex items-center gap-1.5">
-                                  <span className={item.passed ? 'text-[#A8D5BA]' : 'text-[#D8B878]'}>
+                                  <span className={item.passed ? 'text-[#059669] dark:text-[#A8D5BA]' : 'text-[#D97706] dark:text-[#D8B878]'}>
                                     {item.passed ? '✓' : '△'}
                                   </span>
-                                  <span className={item.passed ? 'text-[#F1F3F1]' : 'text-[#8D9690]'}>
+                                  <span className={item.passed ? 'text-[#111815] dark:text-[#F1F3F1]' : 'text-[#64748B] dark:text-[#8D9690]'}>
                                     {item.title}
                                   </span>
                                 </div>
