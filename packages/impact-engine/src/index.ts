@@ -13,3 +13,21 @@ export * from './calculators/confidence';
 export * from './calculators/equivalences';
 
 export * from './engine';
+
+import { listMethodologies } from './methodologies/registry';
+import { generatePhysicalEquivalences } from './calculators/equivalences';
+
+export const ALL_METHODOLOGIES = listMethodologies();
+
+export function getEquivalences(
+  energyWh: number,
+  waterConsumptionMl: number,
+  carbonG: number
+) {
+  return generatePhysicalEquivalences({
+    energyWh,
+    waterConsumptionMl,
+    carbonG,
+  });
+}
+
