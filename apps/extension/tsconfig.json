@@ -4,6 +4,8 @@
     "jsx": "react-jsx",
     "module": "ESNext",
     "moduleResolution": "bundler",
+    "declaration": false,
+    "declarationMap": false,
     "noEmit": true
   },
   "include": ["entrypoints/**/*", "src/**/*", ".wxt/types/**/*"]

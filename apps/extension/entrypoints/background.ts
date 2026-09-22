@@ -32,7 +32,7 @@ export default defineBackground(() => {
 
 async function handleRecordInteraction(payload: {
   sessionId: string;
-  provider: 'chatgpt';
+  provider: import('@imprint/schemas').ProviderId;
   modelRaw: string | null;
   modelFamily: string | null;
   interactionIndex: number;

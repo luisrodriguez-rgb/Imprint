@@ -4,6 +4,7 @@ import {
   ProviderId,
   MetricValue,
   ConfidenceLevel,
+  ActivityCategory,
 } from '@imprint/schemas';
 
 const STORAGE_KEY_EVENTS = 'imprint_ledger_events';
@@ -13,7 +14,7 @@ export interface ImprintSettings {
   activeMethodologyId: string;
   offlineOnly: boolean;
   gridCarbonIntensity: number;
-  currentActivity: 'study' | 'coding' | 'research' | 'writing' | 'work' | 'entertainment' | 'other';
+  currentActivity: ActivityCategory;
   enableFloatingHud: boolean;
 }
 

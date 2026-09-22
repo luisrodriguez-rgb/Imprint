@@ -103,13 +103,28 @@ export default function App() {
     a.remove();
   }
 
+  const [simulatedProvider, setSimulatedProvider] = useState<import('@imprint/schemas').ProviderId>('chatgpt');
+
   async function handleAddSimulatedTurn() {
+    const providerSpecs: Record<
+      import('@imprint/schemas').ProviderId,
+      { modelRaw: string; family: string; inTok: number; outTok: number; reasonTok: number }
+    > = {
+      chatgpt: { modelRaw: 'GPT-4o', family: 'gpt-4o', inTok: 160, outTok: 420, reasonTok: 0 },
+      claude: { modelRaw: 'Claude 3.7 Sonnet', family: 'claude-3-7-sonnet', inTok: 220, outTok: 580, reasonTok: 600 },
+      gemini: { modelRaw: 'Gemini 2.0 Flash', family: 'gemini-2-flash', inTok: 350, outTok: 450, reasonTok: 0 },
+      grok: { modelRaw: 'Grok 3 Think', family: 'grok-3', inTok: 180, outTok: 490, reasonTok: 800 },
+      other: { modelRaw: 'Generic LLM', family: 'other', inTok: 150, outTok: 300, reasonTok: 0 },
+    };
+
+    const spec = providerSpecs[simulatedProvider] || providerSpecs.chatgpt;
+
     const calculation = estimateImpact({
-      inputTokens: 160,
-      outputTokens: 420,
-      reasoningTokens: 0,
-      modelFamily: 'gpt-4o',
-      providerId: 'chatgpt',
+      inputTokens: spec.inTok,
+      outputTokens: spec.outTok,
+      reasoningTokens: spec.reasonTok,
+      modelFamily: spec.family,
+      providerId: simulatedProvider,
       methodologyId: settings?.activeMethodologyId || 'joule-frontier-2026',
       inputProvenance: 'local_estimation',
       outputProvenance: 'browser_observation',
@@ -119,23 +134,23 @@ export default function App() {
     const newEvent: LedgerEvent = {
       id: `evt-${Date.now()}`,
       timestamp: Date.now(),
-      provider: 'chatgpt',
-      modelRaw: 'GPT-4o',
-      modelFamily: 'gpt-4o',
-      sessionId: 'session-live',
+      provider: simulatedProvider,
+      modelRaw: spec.modelRaw,
+      modelFamily: spec.family,
+      sessionId: `${simulatedProvider}-session-live`,
       interactionIndex: events.length + 1,
       input: {
-        charCount: 580,
-        wordCount: 92,
-        estimatedTokens: 160,
+        charCount: spec.inTok * 4,
+        wordCount: Math.round(spec.inTok * 0.75),
+        estimatedTokens: spec.inTok,
         modality: 'text',
         provenance: 'local_estimation',
       },
       output: {
-        charCount: 1610,
-        wordCount: 265,
-        estimatedTokens: 420,
-        reasoningTokens: 0,
+        charCount: spec.outTok * 4,
+        wordCount: Math.round(spec.outTok * 0.75),
+        estimatedTokens: spec.outTok,
+        reasoningTokens: spec.reasonTok,
         modality: 'text',
         provenance: 'browser_observation',
       },
@@ -230,7 +245,9 @@ export default function App() {
           {/* A. Hero Measurement Box */}
           <section className="bg-[#111513] border border-[#29302C] rounded-xl p-3.5 flex flex-col gap-3">
             <div className="flex items-center justify-between text-[11px] text-[#8D9690]">
-              <span className="font-mono tracking-wider text-[10px] uppercase">TELEMETRY · CHATGPT SESSION</span>
+              <span className="font-mono tracking-wider text-[10px] uppercase">
+                TELEMETRY · {summary ? summary.provider.toUpperCase() : 'ACTIVE'} SESSION
+              </span>
               <span className="font-mono text-[#A8D5BA]">
                 {summary ? `${summary.interactionCount} TURNS` : '0 TURNS'}
               </span>
@@ -409,14 +426,36 @@ export default function App() {
             </div>
           </div>
 
-          {/* Simulated Step Button for Fast Testing */}
-          <button
-            onClick={handleAddSimulatedTurn}
-            className="flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg border border-[#29302C] bg-[#111513] hover:bg-[#171B19] text-xs font-mono text-[#A8D5BA] transition-colors"
-          >
-            <Plus className="w-3 h-3" />
-            <span>RECORD TEST TURN (+1)</span>
-          </button>
+          {/* Simulated Step Controls with Multi-Provider Selector */}
+          <div className="flex flex-col gap-2 p-2.5 rounded-lg border border-[#29302C] bg-[#111513]">
+            <div className="flex items-center justify-between text-[10px] font-mono text-[#8D9690]">
+              <span className="uppercase tracking-wider">Simulate Live Provider Turn</span>
+              <span className="text-[#A8D5BA] font-bold">{simulatedProvider.toUpperCase()}</span>
+            </div>
+            <div className="grid grid-cols-4 gap-1">
+              {(['chatgpt', 'claude', 'gemini', 'grok'] as const).map((p) => (
+                <button
+                  key={p}
+                  type="button"
+                  onClick={() => setSimulatedProvider(p)}
+                  className={`py-1 text-[9px] font-mono rounded border uppercase transition-colors ${
+                    simulatedProvider === p
+                      ? 'bg-[#171B19] border-[#A8D5BA] text-[#A8D5BA] font-bold'
+                      : 'bg-[#0B0D0C] border-[#29302C] text-[#8D9690] hover:text-[#F1F3F1] hover:border-[#3D4742]'
+                  }`}
+                >
+                  {p}
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={handleAddSimulatedTurn}
+              className="mt-0.5 flex items-center justify-center gap-1.5 py-1.5 px-3 rounded border border-[#284D39] bg-[#171B19] hover:bg-[#1E2421] text-xs font-mono text-[#A8D5BA] transition-colors"
+            >
+              <Plus className="w-3 h-3" />
+              <span>LOG TEST TURN ({simulatedProvider.toUpperCase()})</span>
+            </button>
+          </div>
         </main>
       ) : (
         /* 3. Methodology Spec View (Paper-grade Documentation) */
