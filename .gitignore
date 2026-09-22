@@ -18,6 +18,7 @@ build/
 # Testing & Coverage
 coverage/
 .nyc_output/
+.vitest/
 
 # Environment files
 .env
