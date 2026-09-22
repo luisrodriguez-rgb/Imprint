@@ -5,6 +5,9 @@ import {
   TextMetadataSchema,
   DataProvenanceSchema,
   ImpactScopeSchema,
+  SystemParametersSchema,
+  CalculationTraceSchema,
+  BoundTypeSchema,
 } from '../src';
 
 describe('@imprint/schemas', () => {
@@ -382,5 +385,91 @@ describe('@imprint/schemas', () => {
     expect(parsed.geography?.status).toBe('unknown');
     expect(parsed.confidence.epistemic?.unknown).toContain('Datacenter physical location');
     expect(parsed.modelDetection?.fidelity).toBe('high');
+  });
+
+  it('validates SystemParameters, BoundType, and CalculationTrace schema contracts', () => {
+    const params = SystemParametersSchema.parse({
+      pue: 1.15,
+      gridCarbonIntensityGPerKwh: 400,
+      wueLPerKwh: 0.28,
+      ewifLPerKwh: 1.75,
+      coolingTechnology: 'evaporative_cooling_tower',
+      scenarioName: 'custom_facility',
+    });
+    expect(params.pue).toBe(1.15);
+    expect(params.coolingTechnology).toBe('evaporative_cooling_tower');
+
+    expect(BoundTypeSchema.parse('scenario')).toBe('scenario');
+    expect(BoundTypeSchema.parse('methodology_variance')).toBe('methodology_variance');
+
+    const trace = {
+      id: 'trace-001',
+      timestamp: Date.now(),
+      methodology: {
+        id: 'joule-frontier-2026',
+        name: 'Joule Frontier Study (2026)',
+        version: '1.0.0',
+        description: 'Empirical measurement',
+        boundary: 'operational' as const,
+        primaryScope: 'operational' as const,
+        metricsSupported: ['energy_wh'] as const,
+        assumptions: ['Standard decoding dominant'],
+        sources: [
+          {
+            id: 'joule-2026',
+            title: 'Inference energy',
+            year: 2026,
+          },
+        ],
+        uncertaintyModel: {
+          energyVariancePct: 25,
+          waterVariancePct: 40,
+          carbonVariancePct: 35,
+        },
+      },
+      parameters: params,
+      steps: [
+        {
+          stepNumber: 1,
+          name: 'Prefill Energy',
+          formula: 'inputTokens * 0.00003 Wh',
+          inputValues: { inputTokens: 100 },
+          resultValue: 0.003,
+          resultUnit: 'Wh',
+          epistemicType: 'modeled' as const,
+        },
+        {
+          stepNumber: 2,
+          name: 'PUE Overhead',
+          formula: 'operationalWh * (PUE - 1.0)',
+          inputValues: { operationalWh: 0.31, pue: 1.15 },
+          resultValue: 0.0465,
+          resultUnit: 'Wh',
+          epistemicType: 'assumed' as const,
+        },
+      ],
+      epistemic: {
+        observed: ['Prompt length in chars'],
+        estimated: ['Input tokens'],
+        assumed: ['PUE 1.15'],
+        unknown: ['Host rack location'],
+      },
+      sensitivity: [
+        {
+          parameter: 'pue',
+          baselineValue: 1.15,
+          perturbedMin: 1.10,
+          perturbedMax: 1.50,
+          impactOnMetric: 'energy_wh' as const,
+          varianceSharePct: 14.5,
+          description: 'Facility cooling variation accounts for 14.5% of energy uncertainty',
+        },
+      ],
+    };
+
+    const parsedTrace = CalculationTraceSchema.parse(trace);
+    expect(parsedTrace.steps).toHaveLength(2);
+    expect(parsedTrace.sensitivity?.[0].varianceSharePct).toBe(14.5);
+    expect(parsedTrace.parameters.scenarioName).toBe('custom_facility');
   });
 });
