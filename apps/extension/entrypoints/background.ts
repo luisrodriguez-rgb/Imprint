@@ -88,8 +88,8 @@ async function handleRecordInteraction(payload: {
       provenance: 'browser_observation',
     },
     activity: {
-      category: 'study', // Default activity; can be changed manually in popup
-      source: 'heuristic',
+      category: settings.currentActivity || 'study',
+      source: 'manual',
     },
     impact: calculation.impact,
     confidence: calculation.confidence,

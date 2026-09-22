@@ -13,12 +13,16 @@ export interface ImprintSettings {
   activeMethodologyId: string;
   offlineOnly: boolean;
   gridCarbonIntensity: number;
+  currentActivity: 'study' | 'coding' | 'research' | 'writing' | 'work' | 'entertainment' | 'other';
+  enableFloatingHud: boolean;
 }
 
 export const DEFAULT_SETTINGS: ImprintSettings = {
   activeMethodologyId: 'joule-frontier-2026',
   offlineOnly: true,
   gridCarbonIntensity: 380,
+  currentActivity: 'study',
+  enableFloatingHud: true,
 };
 
 // Safe storage wrapper supporting chrome.storage.local, browser.storage.local, or memory fallback
