@@ -8,7 +8,7 @@ export const MetricValueSchema = z.object({
   unit: z.string(),
   provenance: DataProvenanceSchema,
   scope: ImpactScopeSchema,
-  epistemicStatus: EpistemicStatusSchema.default('modeled'),
+  epistemicStatus: EpistemicStatusSchema.optional(),
 });
 
 export type MetricValue = z.infer<typeof MetricValueSchema>;

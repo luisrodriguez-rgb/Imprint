@@ -60,8 +60,8 @@ export const LedgerEventSchema = z.object({
   input: TextMetadataSchema,
   output: TextMetadataSchema.extend({
     reasoningTokens: z.number().min(0).optional(),
-    reasoningProvenance: z.enum(['provider_reported', 'provider_export', 'estimated', 'unknown']).default('unknown'),
-    reasoningIncludedInOutput: z.union([z.boolean(), z.literal('unknown')]).default('unknown'),
+    reasoningProvenance: z.enum(['provider_reported', 'provider_export', 'estimated', 'unknown']).optional(),
+    reasoningIncludedInOutput: z.union([z.boolean(), z.literal('unknown')]).optional(),
   }),
 
   activity: ActivityTagSchema,
