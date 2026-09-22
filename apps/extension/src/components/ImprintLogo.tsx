@@ -23,106 +23,85 @@ export function ImprintLogo({
   const isMedium = fidelity === 'MEDIUM' || fidelity === 'INFERRED';
   const isLow = fidelity === 'LOW' || fidelity === 'MODELED';
 
-  const primaryColor = '#A8D5BA';
+  const primaryColor = '#95C5A8';
   const amberColor = '#D8B878';
-  const dotColor = isHigh ? '#A8D5BA' : isMedium ? '#D8B878' : '#EF4444';
+  const dotColor = isHigh ? '#95C5A8' : isMedium ? '#D8B878' : '#EF4444';
 
-  const loopColor1 = isLow ? amberColor : isMedium ? amberColor : primaryColor;
-  const loopColor2 = isLow ? amberColor : primaryColor;
+  const coreArchColor = isLow ? amberColor : isMedium ? amberColor : primaryColor;
   const chevronColor = isLow ? amberColor : primaryColor;
 
   return (
     <div className={`inline-flex flex-col items-center select-none ${className}`}>
       <svg
         width={size}
-        height={size * 1.15}
-        viewBox="0 0 120 138"
+        height={size * 1.18}
+        viewBox="0 0 130 152"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        className="transition-colors duration-300"
+        className="transition-colors duration-300 overflow-visible"
+        aria-label="Imprint Biometric Telemetry Mark"
       >
-        <g strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round">
-          {/* Outer Layer 1 (Top & Left Arc) */}
-          <path
-            d="M 60 14 C 40 14 26 28 26 50 C 26 65 31 78 38 90"
-            stroke={primaryColor}
-          />
-          <path
-            d="M 66 14.5 C 78 17 90 28 92 42"
-            stroke={primaryColor}
-          />
-          <circle cx="26" cy="50" r="2.2" fill={primaryColor} />
-          <circle cx="92" cy="42" r="2.2" fill={primaryColor} />
+        <g strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round">
+          {/* Outer Layer 1 */}
+          <path d="M 52 14 C 40 15 28 26 24 44 C 22 54 23 68 28 82" stroke={primaryColor} />
+          <path d="M 64 14 C 74 15 84 22 90 32" stroke={primaryColor} />
+          <circle cx="28" cy="82" r="2.2" fill={primaryColor} />
 
-          {/* Layer 2 (Outer-Mid Left & Top) */}
-          <path
-            d="M 52 23 C 38 25 33 38 33 55 C 33 72 40 85 46 95"
-            stroke={primaryColor}
-          />
-          <path
-            d="M 62 22 C 75 23 85 33 86 48"
-            stroke={loopColor2}
-          />
-          <circle cx="33" cy="74" r="2" fill={primaryColor} />
+          {/* Outer Layer 2 */}
+          <path d="M 44 24 C 34 27 28 38 29 52 C 30 64 34 76 40 88" stroke={primaryColor} />
+          <path d="M 58 22 C 68 23 76 29 82 38" stroke={primaryColor} />
+          <circle cx="29" cy="52" r="2.2" fill={primaryColor} />
 
-          {/* Layer 3 (Mid Whorl) */}
-          <path
-            d="M 58 31 C 45 32 40 43 40 58 C 40 70 45 80 50 88"
-            stroke={loopColor2}
-          />
-          <path
-            d="M 66 31 C 74 34 78 42 78 52"
-            stroke={loopColor1}
-          />
-          <circle cx="40" cy="44" r="2" fill={loopColor2} />
+          {/* Layer 3 */}
+          <path d="M 46 36 C 38 40 37 50 37 62 C 37 74 42 86 48 94" stroke={chevronColor} />
+          <path d="M 54 32 C 62 33 70 38 74 46" stroke={primaryColor} />
+          <circle cx="48" cy="94" r="2" fill={chevronColor} />
 
-          {/* Inner Loop (Core Arch & Central Terminal) */}
+          {/* Core Arch */}
           <path
-            d="M 48 64 C 48 48 53 40 60 40 C 67 40 71 47 71 58 L 71 78"
-            stroke={loopColor1}
+            d="M 51 78 L 51 52 C 51 43 69 43 69 52 L 69 78"
+            stroke={coreArchColor}
+            strokeWidth="3.4"
           />
-          <path d="M 60 52 L 60 68" stroke={loopColor1} strokeWidth="3" />
-          <circle cx="60" cy="50" r="2.4" fill={loopColor1} />
+          <path d="M 60 76 L 60 56" stroke={coreArchColor} strokeWidth="3.2" />
+          <circle cx="60" cy="53" r="2.6" fill={coreArchColor} />
 
-          {/* Right Circuit Bars (Vertical Telemetry Traces) */}
-          <path d="M 78 60 L 78 84" stroke={primaryColor} />
-          <path d="M 85 54 L 85 92" stroke={primaryColor} />
-          <path d="M 92 50 L 92 82" stroke={primaryColor} />
-          <circle cx="78" cy="86" r="2" fill={primaryColor} />
-          <circle cx="85" cy="94" r="2" fill={primaryColor} />
-          <circle cx="92" cy="84" r="2" fill={primaryColor} />
+          {/* SMD Component */}
+          <rect x="64.2" y="64" width="3.2" height="8.5" rx="1" fill={coreArchColor} />
+          <circle cx="44" cy="68" r="2.2" fill={primaryColor} />
 
-          {/* Bottom Inverted Chevrons (Topographic Basal Arch) */}
-          <path
-            d="M 42 98 L 60 79 L 78 98"
-            stroke={chevronColor}
-            strokeWidth="3.2"
-          />
-          <path
-            d="M 49 106 L 60 93 L 71 106"
-            stroke={chevronColor}
-            strokeWidth="3"
-          />
-          <path
-            d="M 55 112 L 60 105 L 65 112"
-            stroke={chevronColor}
-            strokeWidth="2.8"
-          />
+          {/* Vertical PCB Traces */}
+          <path d="M 75 50 L 75 80" stroke={primaryColor} />
+          <circle cx="75" cy="82" r="2" fill={primaryColor} />
+
+          <path d="M 81 44 L 81 92" stroke={primaryColor} />
+
+          <path d="M 88 38 L 88 74" stroke={primaryColor} />
+          <path d="M 88 80 L 88 94" stroke={primaryColor} />
+          <circle cx="88" cy="74" r="2" fill={primaryColor} />
+
+          <path d="M 95 32 L 95 86" stroke={primaryColor} />
+          <circle cx="95" cy="88" r="2.2" fill={primaryColor} />
+
+          <path d="M 102 46 L 102 68" stroke={primaryColor} />
+          <circle cx="102" cy="44" r="2" fill={primaryColor} />
+
+          {/* Chevrons */}
+          <path d="M 48 94 L 60 80 L 72 94" stroke={chevronColor} strokeWidth="3.4" />
+          <path d="M 42 104 L 60 89 L 78 104" stroke={chevronColor} strokeWidth="3.2" />
+          <path d="M 36 114 L 60 98 L 84 114" stroke={chevronColor} strokeWidth="3" />
         </g>
 
-        {/* Lower Fidelity Status Indicator Dot */}
-        <circle
-          cx="60"
-          cy="124"
-          r={isHigh ? 2.5 : 3.5}
-          fill={dotColor}
-          className="transition-all duration-300"
-        />
+        {/* Status Dot */}
+        <circle cx="60" cy="128" r={isHigh ? 2.5 : 3.5} fill={dotColor} className="transition-all duration-300" />
+        {!isHigh && (
+          <circle cx="60" cy="128" r="7" stroke={dotColor} strokeWidth="1.2" opacity="0.5" className="animate-ping" />
+        )}
       </svg>
 
       {showFidelityLabel && (
         <span
-          className="text-[9px] font-mono tracking-wider mt-0.5 transition-colors uppercase font-medium"
+          className="text-[10px] font-mono tracking-wider mt-1.5 transition-colors uppercase font-medium"
           style={{ color: dotColor }}
         >
           {isHigh ? 'High-Fidelity' : isMedium ? 'Medium-Fidelity' : 'Low-Observability'}
@@ -130,16 +109,16 @@ export function ImprintLogo({
       )}
 
       {showWordmark && (
-        <div className="flex flex-col items-center mt-1.5">
+        <div className="flex flex-col items-center mt-3">
           <span
-            className="font-sans font-bold tracking-tight text-[#A8D5BA]"
-            style={{ fontSize: `${Math.max(14, size * 0.4)}px`, lineHeight: 1 }}
+            className="font-sans font-bold tracking-tight text-[#95C5A8]"
+            style={{ fontSize: `${Math.max(16, size * 0.44)}px`, lineHeight: 1 }}
           >
             Imprint
           </span>
           <span
-            className="font-mono text-[#8D9690] tracking-wider mt-0.5 uppercase"
-            style={{ fontSize: `${Math.max(8, size * 0.16)}px` }}
+            className="font-mono text-[#8D9690] tracking-widest mt-1.5 uppercase font-medium"
+            style={{ fontSize: `${Math.max(9, size * 0.16)}px` }}
           >
             Personal Resource Ledger
           </span>
