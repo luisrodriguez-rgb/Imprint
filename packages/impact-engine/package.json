@@ -1,0 +1,20 @@
+{
+  "name": "@imprint/impact-engine",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "build": "tsc",
+    "check-types": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@imprint/schemas": "workspace:*"
+  },
+  "devDependencies": {
+    "@imprint/tsconfig": "workspace:*",
+    "typescript": "^5.7.3",
+    "vitest": "^3.0.7"
+  }
+}
