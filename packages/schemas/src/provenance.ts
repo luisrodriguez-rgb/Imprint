@@ -18,3 +18,19 @@ export const ImpactScopeSchema = z.enum([
 ]);
 
 export type ImpactScope = z.infer<typeof ImpactScopeSchema>;
+
+/**
+ * EpistemicStatus is the third orthogonal dimension:
+ * Clarifies what Imprint knows vs. what Imprint models vs. what is completely unknown.
+ */
+export const EpistemicStatusSchema = z.enum([
+  'observed',              // Directly observable in browser DOM or protocol (chars, response completion, timestamp)
+  'estimated',             // Statistically inferred via client algorithms (e.g. token counts)
+  'modeled',               // Derived through scientific formulas from literature (e.g. energy Wh)
+  'assumed',               // Standardized baseline parameter (e.g. hyperscale facility PUE = 1.15)
+  'unknown',               // Completely unknown physical reality (e.g. server location, rack concurrency)
+  'experimental_modeled',  // High-uncertainty LCA extrapolation (e.g. mineral depletion mg Sb-eq)
+]);
+
+export type EpistemicStatus = z.infer<typeof EpistemicStatusSchema>;
+

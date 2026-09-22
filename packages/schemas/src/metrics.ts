@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { DataProvenanceSchema, ImpactScopeSchema } from './provenance';
+import { DataProvenanceSchema, ImpactScopeSchema, EpistemicStatusSchema } from './provenance';
 
 export const MetricValueSchema = z.object({
   min: z.number().min(0),
@@ -8,6 +8,7 @@ export const MetricValueSchema = z.object({
   unit: z.string(),
   provenance: DataProvenanceSchema,
   scope: ImpactScopeSchema,
+  epistemicStatus: EpistemicStatusSchema.default('modeled'),
 });
 
 export type MetricValue = z.infer<typeof MetricValueSchema>;

@@ -208,5 +208,179 @@ describe('@imprint/schemas', () => {
     expect(parsed.id).toBe('google-operational-2025');
     expect(parsed.boundary).toBe('operational');
     expect(parsed.sources).toHaveLength(1);
+    expect(parsed.methodologyType).toBe('peer_reviewed_study'); // default value
+  });
+
+  it('validates epistemic buckets, inference geography, and reasoning provenance in LedgerEvent', () => {
+    const eventWithEpistemicData = {
+      id: 'evt-1002',
+      timestamp: Date.now(),
+      provider: 'claude' as const,
+      modelRaw: 'Claude 3.7 Sonnet',
+      modelFamily: 'claude-3-sonnet',
+      sessionId: 'sess-abc',
+      interactionIndex: 1,
+      input: {
+        charCount: 200,
+        wordCount: 35,
+        estimatedTokens: 50,
+        modality: 'text' as const,
+        provenance: 'local_estimation' as const,
+      },
+      output: {
+        charCount: 1200,
+        wordCount: 220,
+        estimatedTokens: 300,
+        reasoningTokens: 150,
+        reasoningProvenance: 'provider_reported' as const,
+        reasoningIncludedInOutput: true,
+        modality: 'text' as const,
+        provenance: 'browser_observation' as const,
+      },
+      activity: {
+        category: 'work' as const,
+        source: 'heuristic' as const,
+      },
+      impact: {
+        methodologyId: 'joule-frontier-2026',
+        methodologyVersion: '1.0.0',
+        energy: {
+          operational: {
+            min: 0.20,
+            expected: 0.30,
+            max: 0.40,
+            unit: 'Wh',
+            provenance: 'methodology_model' as const,
+            scope: 'operational' as const,
+            epistemicStatus: 'modeled' as const,
+          },
+          datacenterPueOverhead: {
+            min: 0.02,
+            expected: 0.04,
+            max: 0.06,
+            unit: 'Wh',
+            provenance: 'methodology_model' as const,
+            scope: 'datacenter' as const,
+            epistemicStatus: 'modeled' as const,
+          },
+          total: {
+            min: 0.22,
+            expected: 0.34,
+            max: 0.46,
+            unit: 'Wh',
+            provenance: 'methodology_model' as const,
+            scope: 'datacenter' as const,
+            epistemicStatus: 'modeled' as const,
+          },
+        },
+        water: {
+          consumption: {
+            onsite: {
+              min: 0.05,
+              expected: 0.10,
+              max: 0.15,
+              unit: 'mL',
+              provenance: 'methodology_model' as const,
+              scope: 'datacenter' as const,
+              epistemicStatus: 'modeled' as const,
+            },
+            upstream: {
+              min: 0.10,
+              expected: 0.20,
+              max: 0.30,
+              unit: 'mL',
+              provenance: 'methodology_model' as const,
+              scope: 'grid' as const,
+              epistemicStatus: 'modeled' as const,
+            },
+            total: {
+              min: 0.15,
+              expected: 0.30,
+              max: 0.45,
+              unit: 'mL',
+              provenance: 'methodology_model' as const,
+              scope: 'grid' as const,
+              epistemicStatus: 'modeled' as const,
+            },
+          },
+          withdrawal: {
+            onsite: {
+              min: 0.1,
+              expected: 0.2,
+              max: 0.3,
+              unit: 'mL',
+              provenance: 'methodology_model' as const,
+              scope: 'datacenter' as const,
+              epistemicStatus: 'modeled' as const,
+            },
+            upstream: {
+              min: 0.5,
+              expected: 1.0,
+              max: 1.5,
+              unit: 'mL',
+              provenance: 'methodology_model' as const,
+              scope: 'grid' as const,
+              epistemicStatus: 'modeled' as const,
+            },
+            total: {
+              min: 0.6,
+              expected: 1.2,
+              max: 1.8,
+              unit: 'mL',
+              provenance: 'methodology_model' as const,
+              scope: 'grid' as const,
+              epistemicStatus: 'modeled' as const,
+            },
+          },
+        },
+        carbon: {
+          operational: {
+            min: 0.05,
+            expected: 0.12,
+            max: 0.20,
+            unit: 'g CO2e',
+            provenance: 'methodology_model' as const,
+            scope: 'grid' as const,
+            epistemicStatus: 'modeled' as const,
+          },
+          total: {
+            min: 0.05,
+            expected: 0.12,
+            max: 0.20,
+            unit: 'g CO2e',
+            provenance: 'methodology_model' as const,
+            scope: 'grid' as const,
+            epistemicStatus: 'modeled' as const,
+          },
+        },
+      },
+      confidence: {
+        level: 'HIGH' as const,
+        score: 85,
+        summary: 'High fidelity with provider-reported reasoning breakdown',
+        checklist: [],
+        epistemic: {
+          observed: ['Response completion', 'Character count'],
+          estimated: ['Input token count'],
+          assumed: ['Hyperscale PUE 1.12'],
+          unknown: ['Datacenter physical location', 'Server cooling mode'],
+        },
+      },
+      geography: {
+        status: 'unknown' as const,
+      },
+      modelDetection: {
+        raw: 'Claude 3.7 Sonnet',
+        family: 'claude-3-sonnet',
+        provenance: 'browser_observation' as const,
+        fidelity: 'high' as const,
+      },
+    };
+
+    const parsed = LedgerEventSchema.parse(eventWithEpistemicData);
+    expect(parsed.output.reasoningIncludedInOutput).toBe(true);
+    expect(parsed.geography?.status).toBe('unknown');
+    expect(parsed.confidence.epistemic?.unknown).toContain('Datacenter physical location');
+    expect(parsed.modelDetection?.fidelity).toBe('high');
   });
 });

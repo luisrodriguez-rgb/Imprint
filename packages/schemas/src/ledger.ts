@@ -38,6 +38,14 @@ export const TextMetadataSchema = z.object({
 });
 export type TextMetadata = z.infer<typeof TextMetadataSchema>;
 
+export const InferenceGeographySchema = z.object({
+  status: z.enum(['provider_reported', 'inferred', 'unknown']).default('unknown'),
+  region: z.string().optional(),
+  country: z.string().optional(),
+  gridCarbonIntensityGPerKwh: z.number().min(0).optional(),
+});
+export type InferenceGeography = z.infer<typeof InferenceGeographySchema>;
+
 export const LedgerEventSchema = z.object({
   id: z.string(),                                // UUID or monotonic id
   timestamp: z.number(),                         // Unix epoch timestamp (ms)
@@ -52,11 +60,20 @@ export const LedgerEventSchema = z.object({
   input: TextMetadataSchema,
   output: TextMetadataSchema.extend({
     reasoningTokens: z.number().min(0).optional(),
+    reasoningProvenance: z.enum(['provider_reported', 'provider_export', 'estimated', 'unknown']).default('unknown'),
+    reasoningIncludedInOutput: z.union([z.boolean(), z.literal('unknown')]).default('unknown'),
   }),
 
   activity: ActivityTagSchema,
   impact: ImpactResultSchema,
   confidence: ConfidenceAssessmentSchema,
+  geography: InferenceGeographySchema.optional(),
+  modelDetection: z.object({
+    raw: z.string().nullable().optional(),
+    family: z.string().nullable().optional(),
+    provenance: z.enum(['browser_observation', 'provider_api', 'unknown']).default('browser_observation'),
+    fidelity: z.enum(['high', 'medium', 'low']).default('medium'),
+  }).optional(),
 });
 
 export type LedgerEvent = z.infer<typeof LedgerEventSchema>;

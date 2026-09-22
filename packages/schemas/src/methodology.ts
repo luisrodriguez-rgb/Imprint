@@ -10,6 +10,14 @@ export const MethodologyBoundarySchema = z.enum([
 
 export type MethodologyBoundary = z.infer<typeof MethodologyBoundarySchema>;
 
+export const MethodologyTypeSchema = z.enum([
+  'peer_reviewed_study',   // Independent academic or peer-reviewed literature (e.g. Luccioni et al., Joule 2026)
+  'corporate_disclosure',  // First-party tech report or sustainability whitepaper (e.g. Google 2025, Meta LLaMA 3)
+  'industry_standard',     // Standards bodies (e.g. GHG Protocol, ISO 14040/44)
+]);
+
+export type MethodologyType = z.infer<typeof MethodologyTypeSchema>;
+
 export const MetricTypeSchema = z.enum([
   'energy_wh',
   'water_consumption_ml',
@@ -49,6 +57,7 @@ export const MethodologySchema = z.object({
   description: z.string(),
   boundary: MethodologyBoundarySchema,
   primaryScope: ImpactScopeSchema,
+  methodologyType: MethodologyTypeSchema.default('peer_reviewed_study'),
   metricsSupported: z.array(MetricTypeSchema),
   assumptions: z.array(z.string()),
   sources: z.array(MethodologySourceSchema),
