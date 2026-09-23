@@ -5,19 +5,22 @@ import { LedgerEvent } from '@imprint/schemas';
 import { estimateImpact, ALL_METHODOLOGIES } from '@imprint/impact-engine';
 import { generateSeedLedgerEvents } from '../lib/demo-data';
 import { Header } from '../components/Header';
-import { MetricCards } from '../components/MetricCards';
+import { EpistemicHero } from '../components/EpistemicHero';
 import { ChronologyChart } from '../components/ChronologyChart';
 import { ActivityBreakdown } from '../components/ActivityBreakdown';
 import { DualWaterChart } from '../components/DualWaterChart';
 import { LedgerTable } from '../components/LedgerTable';
 import { MethodologyExplorer } from '../components/MethodologyExplorer';
 import { ImportModal } from '../components/ImportModal';
+import { CalculationTraceDrawer } from '../components/CalculationTraceDrawer';
 
 export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState<'analytics' | 'methodologies'>('analytics');
   const [selectedMethodologyId, setSelectedMethodologyId] = useState<string>('joule-frontier-2026');
   const [events, setEvents] = useState<LedgerEvent[]>([]);
   const [isImportOpen, setIsImportOpen] = useState(false);
+  const [isTraceOpen, setIsTraceOpen] = useState(false);
+  const [selectedTraceEvent, setSelectedTraceEvent] = useState<LedgerEvent | null>(null);
   const [isMounted, setIsMounted] = useState(false);
 
   // Initialize data on mount
@@ -151,7 +154,7 @@ export default function DashboardPage() {
 
   if (!isMounted) {
     return (
-      <div className="min-h-screen bg-[var(--bg-page)] flex items-center justify-center font-mono text-xs text-[#64748B] dark:text-[#8D9690]">
+      <div className="min-h-screen bg-[var(--bg-page)] flex items-center justify-center font-sans text-xs text-[#64748B] dark:text-[#8D9690]">
         INITIALIZING SCIENTIFIC INSTRUMENT...
       </div>
     );
@@ -176,8 +179,16 @@ export default function DashboardPage() {
       <main className="flex-1 max-w-7xl w-full mx-auto p-5 sm:p-6 flex flex-col gap-6">
         {activeTab === 'analytics' ? (
           <>
-            {/* 1. Hero KPI Cards */}
-            <MetricCards events={events} />
+            {/* 1. Epistemic Observability Hero ("Make your AI footprint visible") */}
+            <EpistemicHero
+              events={events}
+              activeMethodologyName={activeMethodology.name}
+              activeMethodologyId={selectedMethodologyId}
+              onOpenTrace={() => {
+                setSelectedTraceEvent(null);
+                setIsTraceOpen(true);
+              }}
+            />
 
             {/* 2. Chronological Compute Pulse Waveform */}
             <ChronologyChart events={events} />
@@ -192,7 +203,13 @@ export default function DashboardPage() {
             </div>
 
             {/* 4. Full Turn-by-Turn Ledger Table */}
-            <LedgerTable events={events} />
+            <LedgerTable
+              events={events}
+              onOpenTrace={(ev) => {
+                setSelectedTraceEvent(ev);
+                setIsTraceOpen(true);
+              }}
+            />
           </>
         ) : (
           /* Methodology Atlas & Comparative Matrix */
@@ -206,19 +223,19 @@ export default function DashboardPage() {
 
       {/* Footer */}
       <footer className="border-t border-[#E2E8E4] dark:border-[#29302C] bg-white dark:bg-[#0B0D0C] px-6 py-4 mt-auto transition-colors">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-mono text-[#64748B] dark:text-[#8D9690]">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#64748B] dark:text-[#8D9690] font-sans">
           <div className="flex items-center gap-2">
             <span className="w-1.5 h-1.5 rounded-full bg-[#059669] dark:bg-[#A8D5BA]" />
-            <span className="font-semibold tracking-wide">
-              IMPRINT · PERSONAL COMPUTATIONAL RESOURCE LEDGER
+            <span className="font-semibold tracking-tight text-[#111815] dark:text-[#F1F3F1]">
+              Imprint · Make your AI footprint visible.
             </span>
           </div>
           <div className="flex items-center gap-4 text-[11px]">
-            <span>Local & Privacy-Preserving</span>
+            <span>Measure what can be observed</span>
             <span>·</span>
-            <span>Zero Prompt Storage</span>
+            <span>Estimate what cannot</span>
             <span>·</span>
-            <span>Independent Scientific Methodologies</span>
+            <span>Show the difference</span>
           </div>
         </div>
       </footer>
@@ -228,6 +245,15 @@ export default function DashboardPage() {
         isOpen={isImportOpen}
         onClose={() => setIsImportOpen(false)}
         onImport={handleImportEvents}
+        activeMethodologyId={selectedMethodologyId}
+      />
+
+      {/* Calculation Trace Drawer */}
+      <CalculationTraceDrawer
+        isOpen={isTraceOpen}
+        onClose={() => setIsTraceOpen(false)}
+        event={selectedTraceEvent}
+        events={events}
         activeMethodologyId={selectedMethodologyId}
       />
     </div>
