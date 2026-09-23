@@ -52,13 +52,13 @@ export function MethodologyExplorer({
   });
 
   return (
-    <div className="flex flex-col gap-6 font-mono">
+    <div className="flex flex-col gap-6 font-sans">
       {/* 1. Scientific Principles & System Boundaries Banner */}
       <div className="bg-white dark:bg-[#111513] border border-[#E2E8E4] dark:border-[#29302C] rounded-xl p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-colors shadow-xs dark:shadow-none">
         <div className="flex flex-col gap-1 max-w-2xl">
           <div className="flex items-center gap-2">
             <Scale className="w-4 h-4 text-[#059669] dark:text-[#A8D5BA]" />
-            <h2 className="text-sm font-bold text-[#111815] dark:text-[#F1F3F1] uppercase tracking-wider">
+            <h2 className="text-sm font-semibold text-[#111815] dark:text-[#F1F3F1] tracking-tight">
               Independent Scientific Methodologies
             </h2>
           </div>
@@ -68,8 +68,8 @@ export function MethodologyExplorer({
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="text-xs text-[#64748B] dark:text-[#8D9690]">ACTIVE BASELINE:</span>
-          <span className="text-xs font-bold text-[#059669] dark:text-[#A8D5BA] px-2.5 py-1 rounded bg-emerald-50 dark:bg-[#171B19] border border-emerald-200 dark:border-[#284D39]">
+          <span className="text-xs text-[#64748B] dark:text-[#8D9690]">Active Baseline:</span>
+          <span className="text-xs font-mono font-bold text-[#059669] dark:text-[#A8D5BA] px-2.5 py-1 rounded bg-emerald-50 dark:bg-[#171B19] border border-emerald-200 dark:border-[#284D39]">
             {ALL_METHODOLOGIES.find((m) => m.id === activeMethodologyId)?.name}
           </span>
         </div>

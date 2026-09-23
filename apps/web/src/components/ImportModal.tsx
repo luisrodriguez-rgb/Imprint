@@ -81,13 +81,13 @@ export function ImportModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 font-mono text-xs">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 font-sans text-xs">
       <div className="bg-[#FFFFFF] dark:bg-[#111513] border border-[#E2E8E4] dark:border-[#29302C] text-[#111815] dark:text-[#F1F3F1] rounded-xl w-full max-w-lg overflow-hidden shadow-2xl flex flex-col">
         {/* Modal Header */}
         <div className="p-4 border-b border-[#E2E8E4] dark:border-[#29302C] flex items-center justify-between bg-[#F8FAF9] dark:bg-[#171B19]">
           <div className="flex items-center gap-2">
             <Upload className="w-4 h-4 text-[#059669] dark:text-[#A8D5BA]" />
-            <h3 className="font-bold uppercase tracking-wider text-xs">
+            <h3 className="font-semibold text-sm tracking-tight">
               Import Interaction Ledger
             </h3>
           </div>
@@ -101,15 +101,15 @@ export function ImportModal({
 
         {/* Modal Body */}
         <div className="p-5 flex flex-col gap-4 max-h-[80vh] overflow-y-auto">
-          <p className="text-[#64748B] dark:text-[#8D9690] leading-relaxed text-[11px]">
+          <p className="text-[#64748B] dark:text-[#8D9690] leading-relaxed text-xs">
             Upload or paste an Imprint telemetry JSON file (from the browser extension, database backup, or custom logs). All missing fields will be safely reconstructed and evaluated against the active methodology.
           </p>
 
           {/* File Upload Drop Area */}
-          <label className="border border-dashed border-[#E2E8E4] dark:border-[#29302C] hover:border-[#059669] dark:hover:border-[#A8D5BA] rounded-lg p-5 flex flex-col items-center justify-center gap-2 cursor-pointer bg-[#F8FAF9] dark:bg-[#0B0D0C] hover:bg-[#F1F5F3] dark:hover:bg-[#141816] transition-colors">
+          <label className="border border-dashed border-[#E2E8E4] dark:border-[#29302C] hover:border-[#059669] dark:hover:border-[#A8D5BA] rounded-xl p-5 flex flex-col items-center justify-center gap-2 cursor-pointer bg-[#F8FAF9] dark:bg-[#0B0D0C] hover:bg-[#F1F5F3] dark:hover:bg-[#141816] transition-colors">
             <FileText className="w-7 h-7 text-[#059669]/70 dark:text-[#A8D5BA]/70" />
-            <span className="font-semibold text-xs">Choose JSON ledger file</span>
-            <span className="text-[10px] text-[#64748B] dark:text-[#8D9690]">imprint-ledger-*.json</span>
+            <span className="font-medium text-xs">Choose JSON ledger file</span>
+            <span className="text-[10px] font-mono text-[#64748B] dark:text-[#8D9690]">imprint-ledger-*.json</span>
             <input
               type="file"
               accept=".json,application/json"

@@ -145,47 +145,47 @@ export function ActivityBreakdown({ events, activeMethodologyName }: ActivityBre
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-[#D97706] dark:bg-[#D8B878]" />
-          <h2 className="text-xs font-mono font-bold text-[#111815] dark:text-[#F1F3F1] uppercase tracking-wider">
+          <h2 className="text-sm font-sans font-semibold text-[#111815] dark:text-[#F1F3F1] tracking-tight">
             Workload & Interaction Breakdown
           </h2>
         </div>
         {activeMethodologyName && (
-          <span className="text-[10px] font-mono text-[#059669] dark:text-[#A8D5BA] px-2 py-0.5 rounded bg-emerald-50 dark:bg-[#17231C] border border-emerald-200 dark:border-[#284D39] self-start sm:self-auto">
+          <span className="text-[10px] font-mono text-[#059669] dark:text-[#A8D5BA] px-2 py-0.5 rounded bg-emerald-50 dark:bg-[#17231C] border border-emerald-200 dark:border-[#284D39] self-start sm:self-auto font-medium">
             {activeMethodologyName}
           </span>
         )}
       </div>
 
       {/* Control Toolbar: Dimension & Metric Filters */}
-      <div className="flex flex-wrap items-center justify-between gap-2 pb-3 mb-2 border-b border-[#E2E8E4] dark:border-[#1F2421] text-[10px] font-mono">
+      <div className="flex flex-wrap items-center justify-between gap-2 pb-3 mb-2 border-b border-[#E2E8E4] dark:border-[#1F2421] text-xs font-sans">
         {/* Dimension selector */}
-        <div className="flex items-center gap-1 bg-[#F1F5F3] dark:bg-[#0B0D0C] p-0.5 rounded border border-[#E2E8E4] dark:border-[#29302C]">
+        <div className="flex items-center gap-1 bg-[#F1F5F3] dark:bg-[#0B0D0C] p-0.5 rounded-lg border border-[#E2E8E4] dark:border-[#29302C]">
           <button
             onClick={() => setDimension('activity')}
-            className={`px-2 py-0.5 rounded transition-colors ${
+            className={`px-2.5 py-1 rounded-md transition-colors text-xs font-medium ${
               dimension === 'activity'
-                ? 'bg-white dark:bg-[#171B19] text-[#111815] dark:text-[#F1F3F1] font-bold shadow-xs'
-                : 'text-[#64748B] dark:text-[#8D9690]'
+                ? 'bg-white dark:bg-[#171B19] text-[#111815] dark:text-[#F1F3F1] shadow-xs'
+                : 'text-[#64748B] dark:text-[#8D9690] hover:text-[#111815] dark:hover:text-[#F1F3F1]'
             }`}
           >
             By Intent
           </button>
           <button
             onClick={() => setDimension('provider')}
-            className={`px-2 py-0.5 rounded transition-colors ${
+            className={`px-2.5 py-1 rounded-md transition-colors text-xs font-medium ${
               dimension === 'provider'
-                ? 'bg-white dark:bg-[#171B19] text-[#111815] dark:text-[#F1F3F1] font-bold shadow-xs'
-                : 'text-[#64748B] dark:text-[#8D9690]'
+                ? 'bg-white dark:bg-[#171B19] text-[#111815] dark:text-[#F1F3F1] shadow-xs'
+                : 'text-[#64748B] dark:text-[#8D9690] hover:text-[#111815] dark:hover:text-[#F1F3F1]'
             }`}
           >
             By Provider
           </button>
           <button
             onClick={() => setDimension('model')}
-            className={`px-2 py-0.5 rounded transition-colors ${
+            className={`px-2.5 py-1 rounded-md transition-colors text-xs font-medium ${
               dimension === 'model'
-                ? 'bg-white dark:bg-[#171B19] text-[#111815] dark:text-[#F1F3F1] font-bold shadow-xs'
-                : 'text-[#64748B] dark:text-[#8D9690]'
+                ? 'bg-white dark:bg-[#171B19] text-[#111815] dark:text-[#F1F3F1] shadow-xs'
+                : 'text-[#64748B] dark:text-[#8D9690] hover:text-[#111815] dark:hover:text-[#F1F3F1]'
             }`}
           >
             By Model
@@ -193,33 +193,33 @@ export function ActivityBreakdown({ events, activeMethodologyName }: ActivityBre
         </div>
 
         {/* Metric selector */}
-        <div className="flex items-center gap-1 bg-[#F1F5F3] dark:bg-[#0B0D0C] p-0.5 rounded border border-[#E2E8E4] dark:border-[#29302C]">
+        <div className="flex items-center gap-1 bg-[#F1F5F3] dark:bg-[#0B0D0C] p-0.5 rounded-lg border border-[#E2E8E4] dark:border-[#29302C]">
           <button
             onClick={() => setMetric('energy')}
-            className={`px-2 py-0.5 rounded transition-colors ${
+            className={`px-2.5 py-1 rounded-md transition-colors text-xs font-medium ${
               metric === 'energy'
-                ? 'bg-white dark:bg-[#171B19] text-[#059669] dark:text-[#A8D5BA] font-bold shadow-xs'
-                : 'text-[#64748B] dark:text-[#8D9690]'
+                ? 'bg-white dark:bg-[#171B19] text-[#059669] dark:text-[#A8D5BA] font-semibold shadow-xs'
+                : 'text-[#64748B] dark:text-[#8D9690] hover:text-[#059669] dark:hover:text-[#A8D5BA]'
             }`}
           >
             Energy (Wh)
           </button>
           <button
             onClick={() => setMetric('water')}
-            className={`px-2 py-0.5 rounded transition-colors ${
+            className={`px-2.5 py-1 rounded-md transition-colors text-xs font-medium ${
               metric === 'water'
-                ? 'bg-white dark:bg-[#171B19] text-[#2563EB] dark:text-[#3B82F6] font-bold shadow-xs'
-                : 'text-[#64748B] dark:text-[#8D9690]'
+                ? 'bg-white dark:bg-[#171B19] text-[#2563EB] dark:text-[#3B82F6] font-semibold shadow-xs'
+                : 'text-[#64748B] dark:text-[#8D9690] hover:text-[#2563EB] dark:hover:text-[#3B82F6]'
             }`}
           >
             Water (mL)
           </button>
           <button
             onClick={() => setMetric('carbon')}
-            className={`px-2 py-0.5 rounded transition-colors ${
+            className={`px-2.5 py-1 rounded-md transition-colors text-xs font-medium ${
               metric === 'carbon'
-                ? 'bg-white dark:bg-[#171B19] text-[#D97706] dark:text-[#D8B878] font-bold shadow-xs'
-                : 'text-[#64748B] dark:text-[#8D9690]'
+                ? 'bg-white dark:bg-[#171B19] text-[#D97706] dark:text-[#D8B878] font-semibold shadow-xs'
+                : 'text-[#64748B] dark:text-[#8D9690] hover:text-[#D97706] dark:hover:text-[#D8B878]'
             }`}
           >
             Carbon (g)

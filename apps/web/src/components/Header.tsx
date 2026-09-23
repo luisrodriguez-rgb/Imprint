@@ -73,8 +73,8 @@ export function Header({
                 {eventCount} Turns Recorded
               </span>
             </div>
-            <span className="text-[10px] font-mono tracking-wider text-[#64748B] dark:text-[#8D9690] uppercase">
-              Personal Resource Ledger · Environmental Inference
+            <span className="text-xs font-sans text-[#64748B] dark:text-[#8D9690]">
+              Make your AI footprint visible.
             </span>
           </div>
         </div>
@@ -83,9 +83,9 @@ export function Header({
         <div className="flex items-center self-start lg:self-center p-1 bg-[#F1F5F3] dark:bg-[#111513] border border-[#E2E8E4] dark:border-[#29302C] rounded-lg">
           <button
             onClick={() => setActiveTab('analytics')}
-            className={`flex items-center gap-2 px-3.5 py-1.5 text-xs font-medium rounded-md transition-all ${
+            className={`flex items-center gap-2 px-3.5 py-1.5 text-xs font-sans font-medium rounded-md transition-all ${
               activeTab === 'analytics'
-                ? 'bg-white dark:bg-[#171B19] text-[#111815] dark:text-[#F1F3F1] shadow-sm dark:shadow-none border border-[#E2E8E4] dark:border-[#29302C]'
+                ? 'bg-white dark:bg-[#171B19] text-[#111815] dark:text-[#F1F3F1] shadow-xs dark:shadow-none border border-[#E2E8E4] dark:border-[#29302C]'
                 : 'text-[#64748B] dark:text-[#8D9690] hover:text-[#111815] dark:hover:text-[#F1F3F1]'
             }`}
           >
@@ -94,9 +94,9 @@ export function Header({
           </button>
           <button
             onClick={() => setActiveTab('methodologies')}
-            className={`flex items-center gap-2 px-3.5 py-1.5 text-xs font-medium rounded-md transition-all ${
+            className={`flex items-center gap-2 px-3.5 py-1.5 text-xs font-sans font-medium rounded-md transition-all ${
               activeTab === 'methodologies'
-                ? 'bg-white dark:bg-[#171B19] text-[#111815] dark:text-[#F1F3F1] shadow-sm dark:shadow-none border border-[#E2E8E4] dark:border-[#29302C]'
+                ? 'bg-white dark:bg-[#171B19] text-[#111815] dark:text-[#F1F3F1] shadow-xs dark:shadow-none border border-[#E2E8E4] dark:border-[#29302C]'
                 : 'text-[#64748B] dark:text-[#8D9690] hover:text-[#111815] dark:hover:text-[#F1F3F1]'
             }`}
           >
@@ -108,15 +108,15 @@ export function Header({
         {/* 3. Right: Methodology Selector, Actions, Theme Toggle, and User Profile */}
         <div className="flex flex-wrap items-center gap-2 self-start lg:self-auto">
           {/* Methodology Selector */}
-          <div className="flex items-center gap-1.5 bg-[#F8FAF9] dark:bg-[#111513] border border-[#E2E8E4] dark:border-[#29302C] px-2.5 py-1 rounded-lg text-xs font-mono">
+          <div className="flex items-center gap-1.5 bg-[#F8FAF9] dark:bg-[#111513] border border-[#E2E8E4] dark:border-[#29302C] px-2.5 py-1 rounded-lg text-xs font-sans">
             <Layers className="w-3 h-3 text-[#059669] dark:text-[#A8D5BA] shrink-0" />
-            <span className="text-[10px] text-[#64748B] dark:text-[#8D9690] uppercase hidden sm:inline">
+            <span className="text-[11px] text-[#64748B] dark:text-[#8D9690] hidden sm:inline">
               Method:
             </span>
             <select
               value={selectedMethodologyId}
               onChange={(e) => setSelectedMethodologyId(e.target.value)}
-              className="bg-transparent text-xs font-medium text-[#111815] dark:text-[#F1F3F1] focus:outline-none cursor-pointer pr-1"
+              className="bg-transparent text-xs font-medium text-[#111815] dark:text-[#F1F3F1] focus:outline-none cursor-pointer pr-1 font-sans"
             >
               {ALL_METHODOLOGIES.map((m) => (
                 <option
@@ -133,11 +133,11 @@ export function Header({
           {/* Import Button */}
           <button
             onClick={onOpenImport}
-            className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-mono bg-[#F8FAF9] dark:bg-[#111513] hover:bg-[#F1F5F3] dark:hover:bg-[#171B19] border border-[#E2E8E4] dark:border-[#29302C] text-[#111815] dark:text-[#F1F3F1] rounded-lg transition-colors"
+            className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-sans font-medium bg-[#F8FAF9] dark:bg-[#111513] hover:bg-[#F1F5F3] dark:hover:bg-[#171B19] border border-[#E2E8E4] dark:border-[#29302C] text-[#111815] dark:text-[#F1F3F1] rounded-lg transition-colors"
             title="Import JSON ledger from browser extension or database"
           >
             <Upload className="w-3.5 h-3.5 text-[#D97706] dark:text-[#D8B878]" />
-            <span className="font-semibold text-[11px]">IMPORT</span>
+            <span>Import</span>
           </button>
 
           {/* Export Dropdown / Buttons */}

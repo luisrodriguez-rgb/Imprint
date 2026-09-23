@@ -148,20 +148,20 @@ export function DualWaterChart({ events }: DualWaterChartProps) {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-2">
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-[#2563EB] dark:bg-[#3B82F6]" />
-          <h2 className="text-xs font-mono font-bold text-[#111815] dark:text-[#F1F3F1] uppercase tracking-wider">
-            Dual Water Footprint Matrix
+          <h2 className="text-sm font-sans font-semibold text-[#111815] dark:text-[#F1F3F1] tracking-tight">
+            Dual Water Accounting Matrix
           </h2>
         </div>
-        <span className="text-[10px] font-mono text-[#64748B] dark:text-[#8D9690]">
-          DIRECT COOLING VS. ELECTRIC GRID WATER
+        <span className="text-xs font-sans text-[#64748B] dark:text-[#8D9690]">
+          Direct cooling vs. thermoelectric grid water
         </span>
       </div>
 
       {/* Scientific explanation pill */}
-      <div className="text-[10px] font-mono text-[#64748B] dark:text-[#8D9690] bg-[#F8FAF9] dark:bg-[#0B0D0C] p-2 rounded border border-[#E2E8E4] dark:border-[#1F2421] mb-2 flex items-start gap-2">
+      <div className="text-xs font-sans text-[#64748B] dark:text-[#8D9690] bg-[#F8FAF9] dark:bg-[#0B0D0C] p-2.5 rounded-lg border border-[#E2E8E4] dark:border-[#1F2421] mb-2 flex items-start gap-2">
         <Info className="w-3.5 h-3.5 text-[#2563EB] dark:text-[#3B82F6] shrink-0 mt-0.5" />
-        <span className="leading-tight">
-          <strong className="text-[#111815] dark:text-[#F1F3F1]">Direct Onsite:</strong> Water evaporated in datacenter chillers. <strong className="text-[#111815] dark:text-[#F1F3F1]">Upstream Grid:</strong> Water used at power plants generating the electricity.
+        <span className="leading-snug">
+          <strong className="text-[#111815] dark:text-[#F1F3F1] font-medium">Direct Onsite:</strong> Water evaporated in datacenter cooling towers. <strong className="text-[#111815] dark:text-[#F1F3F1] font-medium">Upstream Grid:</strong> Water used by thermoelectric power plants generating the electricity.
         </span>
       </div>
 
@@ -169,10 +169,10 @@ export function DualWaterChart({ events }: DualWaterChartProps) {
       <div ref={chartRef} className="w-full h-48" />
 
       {/* Footer Metrics */}
-      <div className="pt-3 mt-2 border-t border-[#E2E8E4] dark:border-[#1F2421] text-[10px] font-mono text-[#64748B] dark:text-[#8D9690] flex items-center justify-between">
-        <span>Total Water Diverted: {round(onsiteWithdrawal + upstreamWithdrawal)} mL</span>
-        <span className="text-[#2563EB] dark:text-[#60A5FA] font-bold">
-          Evaporative Net Loss: {round(onsiteConsumption + upstreamConsumption)} mL
+      <div className="pt-3 mt-2 border-t border-[#E2E8E4] dark:border-[#1F2421] text-xs font-sans text-[#64748B] dark:text-[#8D9690] flex items-center justify-between">
+        <span>Total Water Diverted: <strong className="font-mono text-[#111815] dark:text-[#F1F3F1]">{round(onsiteWithdrawal + upstreamWithdrawal)} mL</strong></span>
+        <span className="text-[#2563EB] dark:text-[#60A5FA]">
+          Evaporative Net Loss: <strong className="font-mono font-bold">{round(onsiteConsumption + upstreamConsumption)} mL</strong>
         </span>
       </div>
     </div>
